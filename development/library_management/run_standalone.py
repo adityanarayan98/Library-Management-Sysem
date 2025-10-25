@@ -55,8 +55,9 @@ def main():
     print("Library Management System")
     print("=" * 50)
     print("Starting the application...")
-    print("Admin interface will open automatically at: http://localhost:5000")
-    print("OPAC interface available at: http://localhost:5001")
+    print("Admin interface will open automatically at: http://localhost:5000 or http://[YOUR_IP]:5000")
+    print("OPAC interface available at: http://localhost:5001 or http://[YOUR_IP]:5001")
+    print("Using Gunicorn for better performance when available")
     print("Press Ctrl+C to stop both servers")
     print("-" * 50)
 
@@ -98,21 +99,53 @@ def main():
 
         def run_full_app():
             print("Starting full library management server on http://localhost:5000")
-            full_app.run(
-                host='0.0.0.0',
-                port=5000,
-                debug=False,
-                use_reloader=False
-            )
+            try:
+                from gunicorn.app.wsgiapp import WSGIApplication
+                print("Using Gunicorn for better performance...")
+
+                class StandaloneGunicornConfig:
+                    bind = "0.0.0.0:5000"
+                    workers = 2
+                    worker_class = "sync"
+                    timeout = 30
+                    loglevel = "info"
+
+                config = StandaloneGunicornConfig()
+                WSGIApplication("%(prog)s [OPTIONS] [APP_MODULE]", config).run()
+
+            except ImportError:
+                print("Gunicorn not available, using Flask development server...")
+                full_app.run(
+                    host='0.0.0.0',
+                    port=5000,
+                    debug=False,
+                    use_reloader=False
+                )
 
         def run_opac_app():
             print("Starting OPAC server on http://localhost:5001")
-            opac_app.run(
-                host='0.0.0.0',
-                port=5001,
-                debug=False,
-                use_reloader=False
-            )
+            try:
+                from gunicorn.app.wsgiapp import WSGIApplication
+                print("Using Gunicorn for better performance...")
+
+                class StandaloneGunicornConfig:
+                    bind = "0.0.0.0:5001"
+                    workers = 2
+                    worker_class = "sync"
+                    timeout = 30
+                    loglevel = "info"
+
+                config = StandaloneGunicornConfig()
+                WSGIApplication("%(prog)s [OPTIONS] [APP_MODULE]", config).run()
+
+            except ImportError:
+                print("Gunicorn not available, using Flask development server...")
+                opac_app.run(
+                    host='0.0.0.0',
+                    port=5001,
+                    debug=False,
+                    use_reloader=False
+                )
 
         # Schedule browser opening after 3 seconds (open admin interface)
         Timer(3.0, open_browser).start()
@@ -120,8 +153,8 @@ def main():
         print("Database should be created and accessible now")
         print("-" * 50)
         print("Starting both servers...")
-        print("Admin interface: http://localhost:5000")
-        print("OPAC interface: http://localhost:5001")
+        print("Admin interface: http://localhost:5000 or http://[YOUR_IP]:5000")
+        print("OPAC interface: http://localhost:5001 or http://[YOUR_IP]:5001")
         print("-" * 50)
 
         # Start both servers in separate threads

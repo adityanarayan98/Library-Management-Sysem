@@ -148,13 +148,32 @@ def start_admin_server():
         print("Dashboard: http://localhost:5000/dashboard or http://[YOUR_IP]:5000/dashboard")
         print("Login: http://localhost:5000/login or http://[YOUR_IP]:5000/login")
 
-        # Run the admin application
-        app.run(
-            host='0.0.0.0',
-            port=5000,
-            debug=True,
-            use_reloader=False
-        )
+        # Try to use Gunicorn if available, fallback to Flask dev server
+        try:
+            from gunicorn.app.wsgiapp import WSGIApplication
+            print("Using Gunicorn for better performance...")
+
+            # Create a minimal Gunicorn config for development
+            class DevGunicornConfig:
+                bind = "0.0.0.0:5000"
+                workers = 2
+                worker_class = "sync"
+                timeout = 30
+                reload = True
+                loglevel = "info"
+
+            config = DevGunicornConfig()
+            WSGIApplication("%(prog)s [OPTIONS] [APP_MODULE]", config).run()
+
+        except ImportError:
+            print("Gunicorn not available, using Flask development server...")
+            # Run the admin application with Flask dev server
+            app.run(
+                host='0.0.0.0',
+                port=5000,
+                debug=True,
+                use_reloader=False
+            )
 
     except KeyboardInterrupt:
         print("\nAdmin Server stopped by user")
@@ -171,13 +190,32 @@ def start_opac_server():
         print("Access the OPAC interface at: http://localhost:5001 or http://[YOUR_IP]:5001")
         print("OPAC Search: http://localhost:5001/opac/search or http://[YOUR_IP]:5001/opac/search")
 
-        # Run the OPAC application
-        app.run(
-            host='0.0.0.0',
-            port=5001,
-            debug=True,
-            use_reloader=False
-        )
+        # Try to use Gunicorn if available, fallback to Flask dev server
+        try:
+            from gunicorn.app.wsgiapp import WSGIApplication
+            print("Using Gunicorn for better performance...")
+
+            # Create a minimal Gunicorn config for development
+            class DevGunicornConfig:
+                bind = "0.0.0.0:5001"
+                workers = 2
+                worker_class = "sync"
+                timeout = 30
+                reload = True
+                loglevel = "info"
+
+            config = DevGunicornConfig()
+            WSGIApplication("%(prog)s [OPTIONS] [APP_MODULE]", config).run()
+
+        except ImportError:
+            print("Gunicorn not available, using Flask development server...")
+            # Run the OPAC application with Flask dev server
+            app.run(
+                host='0.0.0.0',
+                port=5001,
+                debug=True,
+                use_reloader=False
+            )
 
     except KeyboardInterrupt:
         print("\nOPAC Server stopped by user")

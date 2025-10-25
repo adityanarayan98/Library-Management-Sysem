@@ -4,6 +4,7 @@ echo Starting Library Management System...
 echo.
 echo Admin interface will open at: http://localhost:5000 or http://[YOUR_IP]:5000
 echo OPAC interface available at: http://localhost:5001 or http://[YOUR_IP]:5001
+echo Using Gunicorn for better performance
 echo.
 echo Press Ctrl+C to stop the server
 echo.

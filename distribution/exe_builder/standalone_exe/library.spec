@@ -39,6 +39,10 @@ hidden_imports = [
     'wtforms.widgets',
     'wtforms.validators',
     'flask_wtf.csrf',
+    'gunicorn',
+    'gunicorn.app.wsgiapp',
+    'gunicorn.workers.sync',
+    'gunicorn.workers.ggevent',
 ]
 
 # Define data files to include (templates, static files, etc.)

@@ -44,6 +44,7 @@ echo echo Starting Library Management System... >> "Library Management System.ex
 echo echo. >> "Library Management System.exe.bat"
 echo echo Admin interface will open at: http://localhost:5000 or http://[YOUR_IP]:5000 >> "Library Management System.exe.bat"
 echo echo OPAC interface available at: http://localhost:5001 or http://[YOUR_IP]:5001 >> "Library Management System.exe.bat"
+echo echo Using Gunicorn for better performance >> "Library Management System.exe.bat"
 echo echo. >> "Library Management System.exe.bat"
 echo echo Press Ctrl+C to stop the server >> "Library Management System.exe.bat"
 echo echo. >> "Library Management System.exe.bat"
