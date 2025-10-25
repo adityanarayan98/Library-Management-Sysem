@@ -8,36 +8,30 @@ echo This script will package your Library Management System into a standalone .
 echo that can run on any Windows computer without requiring Python installation.
 echo.
 
-pause
-
-echo.
 echo Step 1: Checking Python installation...
 python --version
 if errorlevel 1 (
     echo ERROR: Python is not installed or not in PATH
     echo Please install Python 3.7+ and try again
-    pause
     exit /b 1
 )
 
 echo.
 echo Step 2: Installing PyInstaller...
-pip install pyinstaller
+python -m pip install pyinstaller
 if errorlevel 1 (
     echo ERROR: Failed to install PyInstaller
     echo Please check your internet connection and try again
-    pause
     exit /b 1
 )
 
 echo.
 echo Step 3: Building the executable...
 echo This may take several minutes...
-pyinstaller library.spec --clean
+python -m pyinstaller library.spec --clean
 if errorlevel 1 (
     echo ERROR: Failed to build executable
     echo Check the error messages above
-    pause
     exit /b 1
 )
 
@@ -48,7 +42,8 @@ echo @echo off > "Library Management System.exe.bat"
 echo title Library Management System >> "Library Management System.exe.bat"
 echo echo Starting Library Management System... >> "Library Management System.exe.bat"
 echo echo. >> "Library Management System.exe.bat"
-echo echo The web interface will open at: http://localhost:5001 >> "Library Management System.exe.bat"
+echo echo Admin interface will open at: http://localhost:5000 or http://[YOUR_IP]:5000 >> "Library Management System.exe.bat"
+echo echo OPAC interface available at: http://localhost:5001 or http://[YOUR_IP]:5001 >> "Library Management System.exe.bat"
 echo echo. >> "Library Management System.exe.bat"
 echo echo Press Ctrl+C to stop the server >> "Library Management System.exe.bat"
 echo echo. >> "Library Management System.exe.bat"
@@ -73,9 +68,8 @@ echo 1. Double-click: "Library Management System.exe.bat"
 echo    OR
 echo 2. Run: library_management\dist\LibraryManagementSystem\LibraryManagementSystem.exe
 echo.
-echo The web interface will be available at: http://localhost:5001
+echo Admin interface: http://localhost:5000 or http://[YOUR_IP]:5000
+echo OPAC interface: http://localhost:5001 or http://[YOUR_IP]:5001
 echo.
 echo ========================================
 echo.
-
-pause

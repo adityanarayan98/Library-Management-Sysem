@@ -45,7 +45,7 @@ def ensure_directories():
 
 def open_browser():
     """Open web browser after a delay"""
-    url = "http://localhost:5001"
+    url = "http://localhost:5000"
     print(f"\nOpening web browser: {url}")
     webbrowser.open(url)
 
@@ -55,8 +55,9 @@ def main():
     print("Library Management System")
     print("=" * 50)
     print("Starting the application...")
-    print("The web interface will open automatically at: http://localhost:5001")
-    print("Press Ctrl+C to stop the server")
+    print("Admin interface will open automatically at: http://localhost:5000")
+    print("OPAC interface available at: http://localhost:5001")
+    print("Press Ctrl+C to stop both servers")
     print("-" * 50)
 
     # Check Python version
@@ -76,10 +77,12 @@ def main():
 
     # Import and run the Flask app
     try:
+        from app import create_app
         from run_opac import create_opac_app
         from app.database import Database
+        from threading import Thread
 
-        print("Creating and verifying database before starting server...")
+        print("Creating and verifying database before starting servers...")
         # Create database instance to ensure database file exists
         db = Database()
 
@@ -89,22 +92,48 @@ def main():
         else:
             print("❌ Database connection failed, but continuing...")
 
-        app = create_opac_app()
+        # Create both apps
+        full_app = create_app()
+        opac_app = create_opac_app()
 
-        # Schedule browser opening after 3 seconds
+        def run_full_app():
+            print("Starting full library management server on http://localhost:5000")
+            full_app.run(
+                host='0.0.0.0',
+                port=5000,
+                debug=False,
+                use_reloader=False
+            )
+
+        def run_opac_app():
+            print("Starting OPAC server on http://localhost:5001")
+            opac_app.run(
+                host='0.0.0.0',
+                port=5001,
+                debug=False,
+                use_reloader=False
+            )
+
+        # Schedule browser opening after 3 seconds (open admin interface)
         Timer(3.0, open_browser).start()
 
-        print("Starting web server on http://localhost:5001")
         print("Database should be created and accessible now")
         print("-" * 50)
+        print("Starting both servers...")
+        print("Admin interface: http://localhost:5000")
+        print("OPAC interface: http://localhost:5001")
+        print("-" * 50)
 
-        # Run the application
-        app.run(
-            host='0.0.0.0',
-            port=5001,
-            debug=False,
-            use_reloader=False  # Disable reloader for standalone mode
-        )
+        # Start both servers in separate threads
+        full_thread = Thread(target=run_full_app)
+        opac_thread = Thread(target=run_opac_app)
+
+        full_thread.start()
+        opac_thread.start()
+
+        # Wait for both threads
+        full_thread.join()
+        opac_thread.join()
 
     except KeyboardInterrupt:
         print("\nShutting down server...")

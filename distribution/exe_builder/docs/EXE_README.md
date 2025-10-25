@@ -31,11 +31,26 @@ This document explains how to create and use the standalone .exe version of your
 ## 🌐 How to Use
 
 1. **Start the application** using one of the methods above
-2. **Wait for the console window** to show "Running on http://localhost:5000"
-3. **Open your web browser** and go to: http://localhost:5000
+2. **Wait for the console window** to show both servers running
+3. **Open your web browser** and go to:
+   - **Admin Interface** (Librarians): http://localhost:5000
+   - **OPAC Interface** (Patrons): http://localhost:5001
 4. **Log in** with the default credentials:
    - Username: `admin`
    - Password: `admin123`
+
+## 🌐 Network Access
+
+The standalone .exe supports network access for multi-user environments:
+
+- **Local Access**: http://localhost:5000 (admin) / http://localhost:5001 (OPAC)
+- **Network Access**: http://[YOUR_IP]:5000 (admin) / http://[YOUR_IP]:5001 (OPAC)
+- **Role-Based Access**: Different interfaces for librarians and patrons
+- **Shared Database**: Both interfaces use the same database for consistency
+
+**To access from other devices on your network:**
+1. Find your computer's IP address (run `ipconfig` in Command Prompt)
+2. Other users can access: http://[YOUR_IP]:5000 (admin) or http://[YOUR_IP]:5001 (OPAC)
 
 ## 📁 What You Get
 

@@ -45,13 +45,24 @@ python run.py
 
 ## 🌐 Access URLs
 
-- **Main Site**: http://localhost:5000
+### Development Servers
+- **Admin Interface** (Librarians): http://localhost:5000 or http://[YOUR_IP]:5000
+- **OPAC Interface** (Patrons): http://localhost:5001 or http://[YOUR_IP]:5001
 - **Dashboard**: http://localhost:5000/dashboard
 - **Login**: http://localhost:5000/login
 
 ### Default Credentials
 - **Username**: `admin`
 - **Password**: `admin123`
+
+## 🌐 Network Access
+
+Your development environment supports network access:
+
+- **Local Testing**: Use localhost URLs for local development
+- **Network Testing**: Use [YOUR_IP] URLs to test from other devices
+- **Role-Based Access**: Separate interfaces for different user types
+- **Shared Database**: Both interfaces use the same database
 
 ## 💾 Database
 

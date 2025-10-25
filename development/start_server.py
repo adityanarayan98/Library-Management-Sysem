@@ -27,7 +27,7 @@ try:
 except ImportError:
     PANDAS_AVAILABLE = False
 
-def check_server_running(host='127.0.0.1', port=5000):
+def check_server_running(host='0.0.0.0', port=5000):
     """Check if server is already running on specified host and port"""
     try:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
@@ -144,13 +144,13 @@ def start_admin_server():
             print("Warning: Backup failed or no data to backup, but continuing...")
 
         print("Admin Server started successfully!")
-        print("Access the admin interface at: http://127.0.0.1:5000")
-        print("Dashboard: http://127.0.0.1:5000/dashboard")
-        print("Login: http://127.0.0.1:5000/login")
+        print("Access the admin interface at: http://localhost:5000 or http://[YOUR_IP]:5000")
+        print("Dashboard: http://localhost:5000/dashboard or http://[YOUR_IP]:5000/dashboard")
+        print("Login: http://localhost:5000/login or http://[YOUR_IP]:5000/login")
 
         # Run the admin application
         app.run(
-            host='127.0.0.1',
+            host='0.0.0.0',
             port=5000,
             debug=True,
             use_reloader=False
@@ -168,12 +168,12 @@ def start_opac_server():
         app = create_opac_app()
 
         print("OPAC Server started successfully!")
-        print("Access the OPAC interface at: http://127.0.0.1:5001")
-        print("OPAC Search: http://127.0.0.1:5001/opac/search")
+        print("Access the OPAC interface at: http://localhost:5001 or http://[YOUR_IP]:5001")
+        print("OPAC Search: http://localhost:5001/opac/search or http://[YOUR_IP]:5001/opac/search")
 
         # Run the OPAC application
         app.run(
-            host='127.0.0.1',
+            host='0.0.0.0',
             port=5001,
             debug=True,
             use_reloader=False
@@ -192,9 +192,9 @@ def start_server():
 
         # Check if servers are already running
         if check_admin_running():
-            print("Warning: Admin server is already running on http://127.0.0.1:5000")
+            print("Warning: Admin server is already running on http://localhost:5000 or http://[YOUR_IP]:5000")
         if check_opac_running():
-            print("Warning: OPAC server is already running on http://127.0.0.1:5001")
+            print("Warning: OPAC server is already running on http://localhost:5001 or http://[YOUR_IP]:5001")
 
         if check_admin_running() or check_opac_running():
             print("   Use 'python start_server.py stop' to stop the servers first")
@@ -211,8 +211,8 @@ def start_server():
 
         print("=" * 50)
         print("Both servers started successfully!")
-        print("Admin Interface: http://127.0.0.1:5000")
-        print("OPAC Interface:  http://127.0.0.1:5001")
+        print("Admin Interface: http://localhost:5000 or http://[YOUR_IP]:5000")
+        print("OPAC Interface:  http://localhost:5001 or http://[YOUR_IP]:5001")
         print("\nPress Ctrl+C to stop both servers")
 
         # Wait for threads (this will block until interrupted)
@@ -243,12 +243,12 @@ def show_status():
 
     if admin_running and opac_running:
         print("Both servers are running:")
-        print("  Admin: http://127.0.0.1:5000")
-        print("  OPAC:  http://127.0.0.1:5001")
+        print("  Admin: http://localhost:5000 or http://[YOUR_IP]:5000")
+        print("  OPAC:  http://localhost:5001 or http://[YOUR_IP]:5001")
     elif admin_running:
-        print("Only Admin server is running: http://127.0.0.1:5000")
+        print("Only Admin server is running: http://localhost:5000 or http://[YOUR_IP]:5000")
     elif opac_running:
-        print("Only OPAC server is running: http://127.0.0.1:5001")
+        print("Only OPAC server is running: http://localhost:5001 or http://[YOUR_IP]:5001")
     else:
         print("No servers are running")
 

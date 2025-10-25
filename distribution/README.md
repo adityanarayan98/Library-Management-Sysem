@@ -92,8 +92,9 @@ create_installer.bat
 ### For Standalone .exe
 1. User receives `LibraryManagementSystem.exe`
 2. Double-click to run
-3. Web interface opens at http://localhost:5000
-4. Fresh database created automatically
+3. **Admin interface** opens at http://localhost:5000 (for librarians)
+4. **OPAC interface** available at http://localhost:5001 (for patrons)
+5. Fresh database created automatically
 
 ### For Professional Installer
 1. User receives `LibraryManagementSystem-Setup.exe`
@@ -102,6 +103,15 @@ create_installer.bat
 4. Desktop shortcut created
 5. Start Menu entry added
 6. Uninstall from Control Panel
+
+## 🌐 Network Access
+
+The system supports network access for multi-user environments:
+
+- **Local Access**: http://localhost:5000 (admin) / http://localhost:5001 (OPAC)
+- **Network Access**: http://[YOUR_IP]:5000 (admin) / http://[YOUR_IP]:5001 (OPAC)
+- **Role-Based**: Different interfaces for librarians (admin) and patrons (OPAC)
+- **Shared Database**: Both interfaces use the same database for consistency
 
 ## 📖 Documentation
 

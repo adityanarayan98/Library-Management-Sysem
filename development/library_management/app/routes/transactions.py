@@ -333,13 +333,13 @@ def fines():
             print("DEBUG: Executing statistics query...")
             try:
                 stats_result = conn.execute(text('''
-                    SELECT
-                        COUNT(*) as total_outstanding,
-                        COALESCE(SUM(CASE WHEN fine_amount = '' THEN 0.0 ELSE CAST(fine_amount AS REAL) END), 0) as total_amount,
-                        COALESCE(AVG(CASE WHEN fine_amount = '' THEN 0.0 ELSE CAST(fine_amount AS REAL) END), 0) as avg_fine
-                    FROM transactions
-                    WHERE CAST(fine_amount AS REAL) > 0 AND fine_paid = 0 AND status = 'returned'
-                ''')).fetchone()
+                SELECT
+                    COUNT(*) as total_outstanding,
+                    COALESCE(SUM(CASE WHEN fine_amount IS NULL OR fine_amount = '' THEN 0.0 ELSE CAST(fine_amount AS REAL) END), 0) as total_amount,
+                    COALESCE(AVG(CASE WHEN fine_amount IS NULL OR fine_amount = '' THEN 0.0 ELSE CAST(fine_amount AS REAL) END), 0) as avg_fine
+                FROM transactions
+                WHERE CAST(COALESCE(fine_amount, '0') AS REAL) > 0 AND fine_paid = 0 AND status = 'returned'
+            ''')).fetchone()
 
                 print(f"DEBUG: Stats query result: {stats_result}")
 
@@ -348,6 +348,15 @@ def fines():
                     total_outstanding = safe_int(stats_result[0])
                     total_amount = safe_float(stats_result[1])
                     avg_fine = safe_float(stats_result[2])
+
+                    # Additional safety check for fine_amount in query results
+                    if outstanding_fines:
+                        for fine in outstanding_fines:
+                            if fine[7] is not None and fine[7] != '':
+                                try:
+                                    fine[7] = float(fine[7])
+                                except (ValueError, TypeError):
+                                    fine[7] = 0.0
 
                     # Ensure we have valid numeric values for template rendering
                     total_outstanding = max(0, total_outstanding)
