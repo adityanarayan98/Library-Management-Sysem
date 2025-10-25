@@ -122,7 +122,7 @@ backups/
 ### 3.1 Initialize Git Repository
 ```bash
 # Navigate to your project directory
-cd "c:\Users\iitgn\OneDrive - iitgn.ac.in\Project\Own 2.0"
+cd path/to/your/library_management_project
 
 # Initialize Git repository
 git init

@@ -48,6 +48,13 @@ This script will:
 - Create backup
 - Start the server
 
+### Development Access
+For development, navigate to the development folder and run:
+```bash
+cd development
+python start_server.py start
+```
+
 ## 🌐 Access Information
 
 - **Main Site**: http://localhost:5000

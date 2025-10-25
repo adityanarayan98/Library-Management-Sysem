@@ -242,5 +242,5 @@
 # 5. Clear Python cache files if experiencing issues
 # 6. Use the new Complete Restore feature for coordinated restoration
 
-# Last Updated: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')
+# Last Updated: 2025-10-25 14:57:00
 # Library Management System - Factory Reset Guide

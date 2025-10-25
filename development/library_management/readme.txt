@@ -76,13 +76,10 @@ This is a modern, web-based library management system built with Python Flask, d
 
 ## ⚡ Installation & Setup
 
-### 1. Clone or Download the Project
+### 1. Navigate to the Project Directory
 ```bash
-# Navigate to your desired directory
-cd "C:\Users\iitgn\OneDrive - iitgn.ac.in\Project\Own 2.0"
-
-# The library_management folder is already created
-cd library_management
+# Navigate to the library_management directory
+cd path/to/your/library_management
 ```
 
 ### 2. Install Python Dependencies
@@ -358,6 +355,13 @@ For technical support or questions:
 4. Deploy updated version
 
 ## 📋 Changelog
+
+### Version 2.0.0 (Current Release - 2025)
+- Updated installation instructions for better generality
+- Enhanced documentation and guides
+- Improved project structure and organization
+- Added comprehensive backup and restore features
+- Updated dependencies and requirements
 
 ### Version 1.0.0 (Initial Release)
 - Complete library management system

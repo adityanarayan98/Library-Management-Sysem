@@ -67,7 +67,7 @@ cd library-management
 ### Step 2: Set Up Python Environment
 ```bash
 # Navigate to project directory
-cd "C:\Path\To\Library\Management"
+cd path/to/library_management
 
 # Create virtual environment (recommended)
 python -m venv venv

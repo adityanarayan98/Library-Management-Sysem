@@ -25,6 +25,9 @@ Welcome to the Library Management System! This guide will help you navigate and 
 3. Fill in your details and create your admin account
 4. Login with your new credentials
 
+### Development Mode
+For development, you can also access via the development server at the same URL.
+
 ### System Navigation
 - **Top Navigation Bar**: Quick access to main sections
 - **Sidebar**: Detailed navigation (visible on larger screens)

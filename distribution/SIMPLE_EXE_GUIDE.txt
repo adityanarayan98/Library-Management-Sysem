@@ -24,13 +24,13 @@ build_exe.bat
 - Create launcher script
 
 ### Step 5: Find your exe file
-Location: development/library_management/dist/LibraryManagementSystem/
+Location: library_management/dist/LibraryManagementSystem/
 Main file: LibraryManagementSystem.exe
 
 ### Step 6: Test the application
 - Double-click: "Library Management System.exe.bat"
 - OR run the exe directly
-- Open browser to: http://localhost:5000
+- Open browser to: http://localhost:5001
 
 ## WHAT YOU GET:
 ✅ Single .exe file that works on any Windows computer
