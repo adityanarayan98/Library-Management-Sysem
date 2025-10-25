@@ -144,7 +144,7 @@ Contributions are welcome! Please feel free to submit issues and enhancement req
 ## 📞 Support
 
 For technical support or questions:
-- Email: library@iitgn.ac.in
+- Email: 
 - Check the documentation in `docs/`
 - Review the installation guide
 - Check the user guide for usage instructions
