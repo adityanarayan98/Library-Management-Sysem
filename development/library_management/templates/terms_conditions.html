@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}Terms & Conditions - {{ library_name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="row align-items-center">
+            <div class="col">
+                <h1 class="mb-0"><i class="bi bi-file-text me-2"></i>Terms & Conditions</h1>
+                <p class="text-muted mb-0">Library Management System Usage Agreement</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-10 offset-lg-1">
+            <div class="card">
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <h4 class="text-primary">Library Management System</h4>
+                        <p class="text-muted">Terms and Conditions of Use</p>
+                        <small class="text-muted">Last updated: October 2025</small>
+                    </div>
+
+                    <div class="content-section">
+                        <h5 class="text-primary mb-3"><i class="bi bi-info-circle me-2"></i>1. Acceptance of Terms</h5>
+                        <p>By accessing and using this Library Management System, you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by the above, please do not use this service.</p>
+                    </div>
+
+                    <div class="content-section">
+                        <h5 class="text-primary mb-3"><i class="bi bi-person-check me-2"></i>2. User Accounts</h5>
+                        <ul>
+                            <li>Users are responsible for maintaining the confidentiality of their account credentials</li>
+                            <li>Users must provide accurate and complete information during registration</li>
+                            <li>Each user is responsible for all activities that occur under their account</li>
+                            <li>Users must notify administrators immediately of any unauthorized use</li>
+                        </ul>
+                    </div>
+
+                    <div class="content-section">
+                        <h5 class="text-primary mb-3"><i class="bi bi-book me-2"></i>3. Library Resources</h5>
+                        <ul>
+                            <li>All library materials must be returned by the specified due date</li>
+                            <li>Users are responsible for any damage to library materials while in their possession</li>
+                            <li>Library materials may not be transferred to other users without proper authorization</li>
+                            <li>Overdue materials may result in fines and suspension of borrowing privileges</li>
+                        </ul>
+                    </div>
+
+                    <div class="content-section">
+                        <h5 class="text-primary mb-3"><i class="bi bi-cash-coin me-2"></i>4. Fines and Penalties</h5>
+                        <ul>
+                            <li>Fines are charged for overdue materials according to the library's fine policy</li>
+                            <li>Users must pay all outstanding fines before borrowing additional materials</li>
+                            <li>Lost or damaged materials will incur replacement costs plus processing fees</li>
+                            <li>Repeated violations may result in permanent suspension of library privileges</li>
+                        </ul>
+                    </div>
+
+                    <div class="content-section">
+                        <h5 class="text-primary mb-3"><i class="bi bi-shield-check me-2"></i>5. Acceptable Use Policy</h5>
+                        <ul>
+                            <li>The system may only be used for legitimate library-related activities</li>
+                            <li>Users must not attempt to circumvent security measures or access unauthorized areas</li>
+                            <li>Sharing of login credentials with other users is strictly prohibited</li>
+                            <li>Any attempt to modify, damage, or disrupt the system is prohibited</li>
+                        </ul>
+                    </div>
+
+                    <div class="content-section">
+                        <h5 class="text-primary mb-3"><i class="bi bi-eye-slash me-2"></i>6. Privacy Policy</h5>
+                        <ul>
+                            <li>Personal information collected is used solely for library management purposes</li>
+                            <li>User data is protected and will not be shared with third parties without consent</li>
+                            <li>Transaction records are maintained for administrative purposes only</li>
+                            <li>Users have the right to access and correct their personal information</li>
+                        </ul>
+                    </div>
+
+                    <div class="content-section">
+                        <h5 class="text-primary mb-3"><i class="bi bi-exclamation-triangle me-2"></i>7. System Availability</h5>
+                        <ul>
+                            <li>The library management system is provided "as is" without warranties</li>
+                            <li>The system may be temporarily unavailable due to maintenance or technical issues</li>
+                            <li>Users should regularly backup their important data</li>
+                            <li>The library is not responsible for data loss due to system failures</li>
+                        </ul>
+                    </div>
+
+                    <div class="content-section">
+                        <h5 class="text-primary mb-3"><i class="bi bi-pencil me-2"></i>8. Modifications to Terms</h5>
+                        <p>The library reserves the right to modify these terms and conditions at any time. Users will be notified of significant changes, and continued use of the system constitutes acceptance of the modified terms.</p>
+                    </div>
+
+                    <div class="content-section">
+                        <h5 class="text-primary mb-3"><i class="bi bi-envelope me-2"></i>9. Contact Information</h5>
+                        <p>For questions regarding these terms and conditions, please contact:</p>
+                        <div class="bg-light p-3 rounded">
+                            <p class="mb-1"><strong>Developer:</strong> Aditya Narayan Sahoo</p>
+                            <p class="mb-1"><strong>Email:</strong> <a href="mailto:aditya.sahoo@iitgn.ac.in">sadityanarayan05@gmail.com</a></p>
+                            <p class="mb-1"><strong>Website:</strong> <a href="https://sites.google.com/view/adityanarayansahoo/home" target="_blank">Developer Portfolio</a></p>
+                            <p class="mb-0"><strong>GitHub:</strong> <a href="https://github.com/adityanarayan98" target="_blank">adityanarayana98</a></p>
+                        </div>
+                    </div>
+
+                    <div class="content-section">
+                        <h5 class="text-primary mb-3"><i class="bi bi-hand-thumbs-up me-2"></i>10. Agreement</h5>
+                        <p>By using this Library Management System, you acknowledge that you have read, understood, and agree to be bound by these terms and conditions.</p>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <a href="{{ url_for('core.dashboard') }}" class="btn btn-primary">
+                            <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.content-section {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.content-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.content-section ul {
+    padding-left: 1.5rem;
+}
+
+.content-section li {
+    margin-bottom: 0.5rem;
+}
+
+.bg-light {
+    background-color: #f8f9fa !important;
+}
+</style>
+{% endblock %}

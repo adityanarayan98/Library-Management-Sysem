@@ -1,0 +1,82 @@
+{% extends "opac/base.html" %}
+
+{% block title %}Browse Categories - Library Catalog{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- OPAC Header -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card bg-light">
+                <div class="card-body text-center">
+                    <h1 class="card-title"><i class="bi bi-grid-3x2 me-2"></i>Browse by Category</h1>
+                    <p class="card-text text-muted">Explore our book collection organized by categories</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Categories Grid -->
+    <div class="row">
+        {% for category, book_count in category_books.items() %}
+        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+            <div class="card h-100 category-card">
+                <div class="card-body text-center">
+                    <div class="category-icon mb-3">
+                        <i class="bi bi-folder text-primary" style="font-size: 3rem;"></i>
+                    </div>
+                    <h5 class="card-title">{{ category.name }}</h5>
+                    <p class="card-text text-muted">
+                        {% if category.description %}
+                            {{ category.description }}
+                        {% else %}
+                            Browse books in this category
+                        {% endif %}
+                    </p>
+                    <div class="book-count mb-3">
+                        <span class="badge bg-primary fs-6">{{ book_count }} books available</span>
+                    </div>
+                    <a href="{{ url_for('opac.category_books', category_id=category.id) }}" class="btn btn-primary">
+                        <i class="bi bi-eye me-2"></i>Browse Books
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Back to Search -->
+    <div class="row mt-4">
+        <div class="col text-center">
+            <a href="{{ url_for('opac.opac_home') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i>Back to Search
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+.category-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid #e9ecef;
+}
+
+.category-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    border-color: var(--accent-color);
+}
+
+.category-icon {
+    opacity: 0.7;
+}
+
+.category-card:hover .category-icon {
+    opacity: 1;
+}
+
+.book-count {
+    margin-top: auto;
+}
+</style>
+{% endblock %}

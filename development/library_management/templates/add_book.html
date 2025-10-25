@@ -1,0 +1,540 @@
+{% extends "base.html" %}
+
+{% block title %}Add Book - {{ library_name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="bi bi-book me-2"></i>Add New Book</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.title.label(class="form-label") }}
+                                    {{ form.title(class="form-control" + (" is-invalid" if form.title.errors else ""), id="title", placeholder="Introduction to Algorithms") }}
+                                    {% if form.title.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.title.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">
+                                        <small class="text-muted">
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.author.label(class="form-label") }}
+                                    {{ form.author(class="form-control" + (" is-invalid" if form.author.errors else ""), id="author", placeholder="Thomas H.") }}
+                                    {% if form.author.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.author.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">
+                                        <small class="text-muted">
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.isbn.label(class="form-label") }}
+                                    {{ form.isbn(class="form-control" + (" is-invalid" if form.isbn.errors else ""), id="isbn", placeholder="978-0262033848") }}
+                                    {% if form.isbn.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.isbn.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">
+                                        <small class="text-muted">
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.publisher.label(class="form-label") }}
+                                    {{ form.publisher(class="form-control" + (" is-invalid" if form.publisher.errors else ""), id="publisher", placeholder="e.g.,McGraw-Hill") }}
+                                    {% if form.publisher.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.publisher.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">
+                                        <small class="text-muted">
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    {{ form.publication_year.label(class="form-label") }}
+                                    {{ form.publication_year(class="form-control" + (" is-invalid" if form.publication_year.errors else ""), id="publication_year", placeholder="2023") }}
+                                    {% if form.publication_year.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.publication_year.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">
+                                        <small class="text-muted">
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    {{ form.accession_number.label(class="form-label") }}
+                                    {{ form.accession_number(class="form-control" + (" is-invalid" if form.accession_number.errors else ""), id="accession_number", placeholder="CS001") }}
+                                    {% if form.accession_number.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.accession_number.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">
+                                        <small class="text-muted">
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="category" class="form-label">Category</label>
+                                    <input type="text" class="form-control" id="category" name="category"
+                                           placeholder="Mathematics"
+                                           autocomplete="off" required>
+                                    <div id="category-suggestions" class="dropdown-menu w-100" style="display: none; max-height: 200px; overflow-y: auto;">
+                                        <div class="dropdown-item text-muted" id="no-suggestions">Start typing to see suggestions...</div>
+                                    </div>
+                                    <div class="form-text">
+                                        <small class="text-muted">
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="status" class="form-label">Status</label>
+                                    <select class="form-select" id="status" name="status" required>
+                                        <option value="">Select Status</option>
+                                        <option value="available">Available</option>
+                                        <option value="issued">Issued</option>
+                                        <option value="lost">Lost</option>
+                                        <option value="damaged">Damaged</option>
+                                        <option value="reserved">Reserved</option>
+                                    </select>
+                                    <div class="form-text">
+                                        <small class="text-muted">
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="call_number" class="form-label">Call No.</label>
+                                    <input type="text" class="form-control" id="call_number" name="call_number" placeholder="669 TAY" pattern="[A-Za-z0-9\s.]+" title="Letters, numbers, spaces, and dots only">
+                                    <div class="form-text">
+                                        <small class="text-muted">
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('books.books') }}" class="btn btn-secondary me-2">
+                                <i class="bi bi-arrow-left me-1"></i>Back to Books
+                            </a>
+                            {{ form.submit(class="btn btn-primary") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Add book page loaded, starting URL parameter processing...');
+
+    // Function to get URL parameters with debugging
+    function getUrlParameter(name) {
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const value = urlParams.get(name);
+            console.log('URL Parameter "' + name + '":', value);
+            return value;
+        } catch (error) {
+            console.error('Error getting URL parameter "' + name + '":', error);
+            return null;
+        }
+    }
+
+    // Helper function to safely decode URL parameter
+    function getDecodedUrlParameter(name) {
+        const value = getUrlParameter(name);
+        if (value) {
+            try {
+                const decoded = decodeURIComponent(value);
+                console.log('Decoded "' + name + '":', decoded);
+                return decoded;
+            } catch (error) {
+                console.error('Error decoding "' + name + '":', error);
+                return value;
+            }
+        }
+        return '';
+    }
+
+    // Function to safely set form field value
+    function setFormFieldValue(fieldId, value) {
+        try {
+            const field = document.getElementById(fieldId);
+            if (field) {
+                field.value = value;
+                console.log('Set field "' + fieldId + '" to:', value);
+            } else {
+                console.warn('Field "' + fieldId + '" not found');
+            }
+        } catch (error) {
+            console.error('Error setting field "' + fieldId + '":', error);
+        }
+    }
+
+    // Wait a bit for all elements to be fully loaded
+    setTimeout(function() {
+        console.log('Processing URL parameters...');
+
+        // Get URL parameters and populate form fields
+        var urlTitle = getDecodedUrlParameter('title');
+        if (urlTitle && urlTitle.trim() !== '') {
+            setFormFieldValue('title', urlTitle);
+        }
+
+        var urlAuthor = getDecodedUrlParameter('author');
+        if (urlAuthor && urlAuthor.trim() !== '') {
+            setFormFieldValue('author', urlAuthor);
+        }
+
+        var urlIsbn = getDecodedUrlParameter('isbn');
+        if (urlIsbn && urlIsbn.trim() !== '') {
+            setFormFieldValue('isbn', urlIsbn);
+        }
+
+        var urlPublisher = getDecodedUrlParameter('publisher');
+        if (urlPublisher && urlPublisher.trim() !== '') {
+            setFormFieldValue('publisher', urlPublisher);
+        }
+
+        var urlPublicationYear = getDecodedUrlParameter('publication_year');
+        if (urlPublicationYear && urlPublicationYear.trim() !== '') {
+            setFormFieldValue('publication_year', urlPublicationYear);
+        }
+
+        var urlAccessionNumber = getDecodedUrlParameter('accession_number');
+        if (urlAccessionNumber && urlAccessionNumber.trim() !== '') {
+            setFormFieldValue('accession_number', urlAccessionNumber);
+        }
+
+        var urlStatus = getDecodedUrlParameter('status');
+        if (urlStatus && urlStatus.trim() !== '') {
+            setFormFieldValue('status', urlStatus);
+        }
+
+        var urlCallNumber = getDecodedUrlParameter('call_number');
+        if (urlCallNumber && urlCallNumber.trim() !== '') {
+            setFormFieldValue('call_number', urlCallNumber);
+        }
+
+        var urlCategory = getDecodedUrlParameter('category');
+        if (urlCategory && urlCategory.trim() !== '') {
+            setFormFieldValue('category', urlCategory);
+            console.log('Set category field to:', urlCategory);
+        } else {
+            console.log('No category parameter found in URL');
+        }
+
+        // Update UI for edit mode if we have a title parameter
+        if (urlTitle && urlTitle.trim() !== '') {
+            try {
+                const headerElement = document.querySelector('.card-header h4');
+                if (headerElement) {
+                    headerElement.textContent = 'Edit Book';
+                    console.log('Updated header text to: Edit Book');
+                }
+
+                const submitButton = document.querySelector('input.btn-primary[type="submit"]');
+                if (submitButton) {
+                    submitButton.value = 'Update Book';
+                    console.log('Updated submit button text to: Update Book');
+                }
+
+                const cardHeader = document.querySelector('.card-header');
+                if (cardHeader && typeof cardHeader.appendChild === 'function') {
+                    const statusDiv = document.createElement('div');
+                    statusDiv.className = 'mt-2';
+                    statusDiv.innerHTML = '<small class="text-muted">Editing existing book - all fields have been pre-populated</small>';
+                    cardHeader.appendChild(statusDiv);
+                    console.log('Added status message to card header');
+                } else {
+                    console.warn('Card header not found or not a valid DOM element');
+                }
+
+                console.log('Updated UI for edit mode');
+            } catch (error) {
+                console.error('Error updating UI for edit mode:', error);
+                console.error('Error details:', error.message);
+            }
+        }
+
+        console.log('URL parameter processing completed');
+
+        // Initialize category autocomplete
+        initializeCategoryAutocomplete();
+    }, 500); // Wait 500ms for everything to load
+
+    // Category autocomplete functionality
+    function initializeCategoryAutocomplete() {
+        const categoryInput = document.getElementById('category');
+        const suggestionsContainer = document.getElementById('category-suggestions');
+        const noSuggestionsText = document.getElementById('no-suggestions');
+
+        let currentSuggestions = [];
+        let selectedIndex = -1;
+        let debounceTimer;
+
+        if (!categoryInput || !suggestionsContainer) {
+            console.warn('Category autocomplete elements not found');
+            return;
+        }
+
+        // Create dropdown container if it doesn't exist
+        if (!suggestionsContainer) {
+            const dropdown = document.createElement('div');
+            dropdown.id = 'category-suggestions';
+            dropdown.className = 'dropdown-menu w-100';
+            dropdown.style.display = 'none';
+            dropdown.style.maxHeight = '200px';
+            dropdown.style.overflowY = 'auto';
+            dropdown.style.position = 'absolute';
+            dropdown.style.zIndex = '1000';
+
+            const noSuggestionDiv = document.createElement('div');
+            noSuggestionDiv.className = 'dropdown-item text-muted';
+            noSuggestionDiv.id = 'no-suggestions';
+            noSuggestionDiv.textContent = 'Start typing to see suggestions...';
+            dropdown.appendChild(noSuggestionDiv);
+
+            categoryInput.parentNode.style.position = 'relative';
+            categoryInput.parentNode.appendChild(dropdown);
+        }
+
+        // Handle input events
+        categoryInput.addEventListener('input', function() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                const query = this.value.trim();
+                if (query.length >= 1) {
+                    fetchCategories(query);
+                } else {
+                    hideSuggestions();
+                }
+            }, 300); // Debounce for 300ms
+        });
+
+        // Handle keyboard navigation
+        categoryInput.addEventListener('keydown', function(e) {
+            const suggestions = suggestionsContainer.querySelectorAll('.dropdown-item:not(.text-muted)');
+
+            switch(e.key) {
+                case 'ArrowDown':
+                    e.preventDefault();
+                    if (suggestionsContainer.style.display !== 'none') {
+                        selectedIndex = Math.min(selectedIndex + 1, suggestions.length - 1);
+                        updateSelection();
+                    } else if (currentSuggestions.length > 0) {
+                        showSuggestions(currentSuggestions);
+                        selectedIndex = 0;
+                        updateSelection();
+                    }
+                    break;
+
+                case 'ArrowUp':
+                    e.preventDefault();
+                    if (suggestionsContainer.style.display !== 'none') {
+                        selectedIndex = Math.max(selectedIndex - 1, 0);
+                        updateSelection();
+                    }
+                    break;
+
+                case 'Enter':
+                    e.preventDefault();
+                    if (selectedIndex >= 0 && suggestions[selectedIndex]) {
+                        selectSuggestion(suggestions[selectedIndex].textContent);
+                    } else if (currentSuggestions.length === 0 && this.value.trim()) {
+                        // No suggestions but user typed something - allow new category
+                        hideSuggestions();
+                    }
+                    break;
+
+                case 'Escape':
+                    e.preventDefault();
+                    hideSuggestions();
+                    selectedIndex = -1;
+                    break;
+
+                case 'Tab':
+                    if (suggestionsContainer.style.display !== 'none') {
+                        e.preventDefault();
+                        if (selectedIndex >= 0 && suggestions[selectedIndex]) {
+                            selectSuggestion(suggestions[selectedIndex].textContent);
+                        }
+                    }
+                    break;
+            }
+        });
+
+        // Handle clicks outside to hide suggestions
+        document.addEventListener('click', function(e) {
+            if (!categoryInput.contains(e.target) && !suggestionsContainer.contains(e.target)) {
+                hideSuggestions();
+                selectedIndex = -1;
+            }
+        });
+
+        // Handle focus events
+        categoryInput.addEventListener('focus', function() {
+            const query = this.value.trim();
+            if (query.length >= 1) {
+                fetchCategories(query);
+            }
+        });
+
+        function fetchCategories(query) {
+            console.log('Fetching categories for:', query);
+
+            fetch(`{{ url_for('books.api_categories') }}?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        console.error('Error fetching categories:', data.error);
+                        return;
+                    }
+
+                    currentSuggestions = data;
+                    showSuggestions(data);
+                })
+                .catch(error => {
+                    console.error('Network error fetching categories:', error);
+                });
+        }
+
+        function showSuggestions(suggestions) {
+            if (suggestions.length === 0) {
+                noSuggestionsText.textContent = 'No categories found. Press Enter to create a new one.';
+                suggestionsContainer.style.display = 'block';
+                selectedIndex = -1;
+                return;
+            }
+
+            // Clear existing suggestions
+            suggestionsContainer.innerHTML = '';
+
+            // Add suggestions
+            suggestions.forEach((category, index) => {
+                const item = document.createElement('div');
+                item.className = 'dropdown-item';
+                item.style.cursor = 'pointer';
+                item.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span><strong>${highlightMatch(category.name, categoryInput.value)}</strong></span>
+                        <small class="text-muted">${category.description || 'No description'}</small>
+                    </div>
+                `;
+
+                item.addEventListener('click', () => {
+                    selectSuggestion(category.name);
+                });
+
+                item.addEventListener('mouseenter', () => {
+                    selectedIndex = index;
+                    updateSelection();
+                });
+
+                suggestionsContainer.appendChild(item);
+            });
+
+            suggestionsContainer.style.display = 'block';
+            selectedIndex = -1;
+        }
+
+        function hideSuggestions() {
+            suggestionsContainer.style.display = 'none';
+            selectedIndex = -1;
+        }
+
+        function selectSuggestion(categoryName) {
+            categoryInput.value = categoryName;
+            hideSuggestions();
+            selectedIndex = -1;
+            console.log('Selected category:', categoryName);
+
+            // Trigger change event for form validation
+            categoryInput.dispatchEvent(new Event('change'));
+        }
+
+        function updateSelection() {
+            const suggestions = suggestionsContainer.querySelectorAll('.dropdown-item');
+            suggestions.forEach((item, index) => {
+                if (index === selectedIndex) {
+                    item.classList.add('active');
+                    item.style.backgroundColor = '#f8f9fa';
+                } else {
+                    item.classList.remove('active');
+                    item.style.backgroundColor = '';
+                }
+            });
+        }
+
+        function highlightMatch(text, query) {
+            if (!query) return text;
+            const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+            return text.replace(regex, '<mark>$1</mark>');
+        }
+
+        console.log('Category autocomplete initialized');
+    }
+});
+</script>
+{% endblock %}

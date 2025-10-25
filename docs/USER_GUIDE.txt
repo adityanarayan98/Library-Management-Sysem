@@ -1,0 +1,246 @@
+# Library Management System - User Guide
+
+## 📚 Table of Contents
+1. Introduction
+2. Getting Started
+3. User Roles and Permissions
+4. Dashboard Overview
+5. Patron Management
+6. Book Management
+7. Transaction Management
+8. Reports and Analytics
+9. Backup and Import
+10. Troubleshooting
+11. Best Practices
+
+## 1. Introduction
+
+Welcome to the Library Management System! This guide will help you navigate and use all the features of the system effectively. The system is designed to be intuitive and user-friendly while providing powerful library management capabilities.
+
+## 2. Getting Started
+
+### First Time Login
+1. Open your web browser and navigate to `http://127.0.0.1:5000`
+2. On first run, you'll be redirected to create an admin account
+3. Fill in your details and create your admin account
+4. Login with your new credentials
+
+### System Navigation
+- **Top Navigation Bar**: Quick access to main sections
+- **Sidebar**: Detailed navigation (visible on larger screens)
+- **Dashboard**: Your command center with key metrics and shortcuts
+
+## 3. User Roles and Permissions
+
+### Admin Role
+- Full system access
+- User management (create librarian accounts)
+- System configuration
+- All reports and analytics
+- Backup and import operations
+- Category management
+
+### Librarian Role
+- Patron management
+- Book management
+- Issue and return books
+- View reports
+- Basic system operations
+
+## 4. Dashboard Overview
+
+The dashboard is your central hub for monitoring library operations:
+
+### Key Metrics Displayed
+- **Total Patrons**: Number of registered library members
+- **Total Books**: Complete book collection size
+- **Available Books**: Currently available for issue
+- **Issued Books**: Currently checked out
+- **Overdue Transactions**: Books past their due date
+
+### Quick Actions
+- **Add Patron**: Quick link to patron registration
+- **Add Book**: Quick link to book entry
+- **View Reports**: Access detailed analytics
+
+## 5. Patron Management
+
+### Adding New Patrons
+1. Navigate to "Patrons" section
+2. Click "Add Patron" or use the quick action button
+3. Fill in patron details:
+   - Roll Number (unique identifier)
+   - Full Name
+   - Email and Phone (optional)
+   - Patron Type (Student/Faculty/Staff)
+   - Department and Division (optional)
+   - Max Books Allowed (based on type)
+
+### Patron Types and Limits
+- **Student**: 3 books max, 14 days due period
+- **Faculty**: 5 books max, 30 days due period
+- **Staff**: 4 books max, 21 days due period
+
+### Searching and Filtering Patrons
+- Search by name, roll number, email, or phone
+- Filter by patron type or status
+- Sort by name or registration date
+- View issued books count for each patron
+
+### Editing Patron Information
+1. Click on a patron's name in the patrons list
+2. Modify any details as needed
+3. Save changes
+
+## 6. Book Management
+
+### Adding New Books
+1. Navigate to "Books" section
+2. Click "Add Book" button
+3. Enter book details:
+   - Title and Author (required)
+   - ISBN (optional)
+   - Publisher and Publication Year (optional)
+   - Accession Number (unique identifier)
+   - Category selection
+   - Price (optional)
+
+### Book Categories
+- Create and manage book categories (Fiction, Science, History, etc.)
+- Assign categories when adding books
+- Filter books by category
+
+### Searching Books
+- Search by title, author, ISBN, or accession number
+- Filter by category or status
+- Sort by title, author, or publication date
+- View book details and transaction history
+
+### Book Status Management
+- **Available**: Ready for issue
+- **Issued**: Currently checked out
+- **Lost/Damaged**: Out of circulation
+
+## 7. Transaction Management
+
+### Issuing Books
+1. Go to "Transactions" > "Issue Book"
+2. Enter patron roll number (system will search and validate)
+3. Enter book accession number (system will search and validate)
+4. Confirm issue - system calculates due date automatically
+5. Book status updates to "issued"
+
+### Returning Books
+1. Go to "Transactions" > "Return Book"
+2. Select the transaction from active loans
+3. Process return - system calculates any fines
+4. Book status updates to "available"
+
+### Fine Calculation
+- Automatic calculation based on overdue days
+- Configurable fine rate per day
+- Track fine payment status
+- Different due periods for different patron types
+
+## 8. Reports and Analytics
+
+### Dashboard Reports
+- Real-time statistics
+- Overdue books summary
+- Recent activity overview
+
+### Detailed Reports
+- Patron activity reports
+- Book circulation reports
+- Fine collection summaries
+- Category-wise book distribution
+
+### Export Options
+- Export data to CSV format
+- Print-friendly report layouts
+- Data backup capabilities
+
+## 9. Backup and Import
+
+### Creating Backups
+1. Go to "Backup" section (Admin only)
+2. Choose backup format (CSV or JSON)
+3. Click "Create Backup"
+4. Download generated files
+
+### Importing Data
+1. Prepare CSV files with proper headers
+2. Go to "Backup" > "Import" section
+3. Upload CSV file
+4. System validates and imports data
+
+### Supported Import Formats
+- **Patrons CSV**: roll_no, name, email, phone, patron_type
+- **Books CSV**: title, author, isbn, publisher, accession_number, category
+
+## 10. Troubleshooting
+
+### Common Issues
+
+#### Login Problems
+- Ensure correct username and password
+- Check if account is active
+- Clear browser cache and cookies
+
+#### Search Not Working
+- Check internet connection
+- Ensure JavaScript is enabled
+- Try refreshing the page
+
+#### Slow Performance
+- Check database size
+- Restart the application
+- Clear browser cache
+
+#### Import Failures
+- Verify CSV file format
+- Check for required columns
+- Ensure data types are correct
+
+### Getting Help
+1. Check browser console for error messages
+2. Verify all form fields are filled correctly
+3. Restart the application if issues persist
+4. Check system logs for detailed error information
+
+## 11. Best Practices
+
+### Data Entry
+- Always use consistent naming conventions
+- Verify data before saving
+- Use meaningful categories for books
+- Keep patron information up to date
+
+### Regular Maintenance
+- Create regular backups
+- Review overdue books daily
+- Update book status as needed
+- Monitor system performance
+
+### Security
+- Use strong passwords
+- Log out when not using the system
+- Keep the system updated
+- Regularly change admin passwords
+
+### User Management
+- Create separate accounts for each librarian
+- Assign appropriate roles
+- Regularly review user access
+- Disable inactive accounts
+
+## Support
+
+For technical support or questions:
+- Email: library@example.com
+- Check the documentation in readme.txt
+- Review system logs for troubleshooting
+
+---
+
+*This user guide provides comprehensive instructions for using the Library Management System effectively. For technical issues, please refer to the troubleshooting section or contact system administration.*

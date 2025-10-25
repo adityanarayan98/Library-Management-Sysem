@@ -1,0 +1,380 @@
+{% extends "base.html" %}
+
+{% block title %}{{ patron.name }} - Patron Details - {{ library_name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('core.dashboard') }}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('patrons.patrons') }}">Patrons</a></li>
+            <li class="breadcrumb-item active">{{ patron.name | replace("'", "\\'") }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Patron Information -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0"><i class="bi bi-person-circle me-2"></i>Patron Details</h4>
+                    <div class="btn-group" role="group">
+                        <a href="{{ url_for('patrons.patrons') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Back to Patrons
+                        </a>
+                        <button class="btn btn-primary" onclick="editPatron()">
+                            <i class="bi bi-pencil me-1"></i>Edit Patron
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Patron Status -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            {% if patron.status == 'active' %}
+                                <span class="badge bg-success fs-6 px-3 py-2">
+                                    <i class="bi bi-check-circle me-1"></i>Active
+                                </span>
+                            {% elif patron.status == 'inactive' %}
+                                <span class="badge bg-secondary fs-6 px-3 py-2">
+                                    <i class="bi bi-pause-circle me-1"></i>Inactive
+                                </span>
+                            {% elif patron.status == 'suspended' %}
+                                <span class="badge bg-danger fs-6 px-3 py-2">
+                                    <i class="bi bi-x-circle me-1"></i>Suspended
+                                </span>
+                            {% else %}
+                                <span class="badge bg-secondary fs-6 px-3 py-2">{{ patron.status.title() }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Patron Information Grid -->
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="patron-info-item">
+                                <label class="text-muted fw-bold">Roll Number</label>
+                                <div class="fw-bold fs-5">{{ patron.roll_no }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="patron-info-item">
+                                <label class="text-muted fw-bold">Patron Type</label>
+                                <div>
+                                    {% if patron.patron_type == 'student' %}
+                                        <span class="badge bg-primary fs-6">{{ patron.patron_type.title() }}</span>
+                                    {% elif patron.patron_type == 'faculty' %}
+                                        <span class="badge bg-success fs-6">{{ patron.patron_type.title() }}</span>
+                                    {% elif patron.patron_type == 'staff' %}
+                                        <span class="badge bg-info fs-6">{{ patron.patron_type.title() }}</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary fs-6">{{ patron.patron_type.title() }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="patron-info-item">
+                                <label class="text-muted fw-bold">Full Name</label>
+                                <div class="fw-bold fs-4">{{ patron.name }}</div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="patron-info-item">
+                                <label class="text-muted fw-bold">Department</label>
+                                <div>{{ patron.department or '-' }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="patron-info-item">
+                                <label class="text-muted fw-bold">Division</label>
+                                <div>{{ patron.division or '-' }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="patron-info-item">
+                                <label class="text-muted fw-bold">Email Address</label>
+                                <div>
+                                    {% if patron.email %}
+                                        <a href="mailto:{{ patron.email }}" class="text-decoration-none">
+                                            <i class="bi bi-envelope me-1"></i>{{ patron.email }}
+                                        </a>
+                                    {% else %}
+                                        <span class="text-muted">Not provided</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="patron-info-item">
+                                <label class="text-muted fw-bold">Phone Number</label>
+                                <div>
+                                    {% if patron.phone %}
+                                        <a href="tel:{{ patron.phone }}" class="text-decoration-none">
+                                            <i class="bi bi-telephone me-1"></i>{{ patron.phone }}
+                                        </a>
+                                    {% else %}
+                                        <span class="text-muted">Not provided</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="patron-info-item">
+                                <label class="text-muted fw-bold">Max Books Allowed</label>
+                                <div class="fw-bold">{{ patron.max_books }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="patron-info-item">
+                                <label class="text-muted fw-bold">Currently Issued</label>
+                                <div class="fw-bold text-primary">{{ stats.current_books }} books</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Currently Issued Books (if any) -->
+            {% if current_transactions %}
+            <div class="card mt-4">
+                <div class="card-header bg-warning bg-opacity-10">
+                    <h5 class="mb-0 text-warning"><i class="bi bi-exclamation-triangle me-2"></i>Currently Issued Books</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Book Title</th>
+                                    <th>Accession No.</th>
+                                    <th>Issue Date</th>
+                                    <th>Due Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for transaction in current_transactions %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ transaction.book.title }}</strong><br>
+                                        <small class="text-muted">{{ transaction.book.accession_number }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">{{ transaction.book.accession_number }}</span>
+                                    </td>
+                                    <td>{{ transaction.issue_date }}</td>
+                                    <td>
+                                        {{ transaction.due_date }}
+                                        {% if transaction.due_date and transaction.due_date < datetime.now().date() %}
+                                            <span class="badge bg-danger ms-2">Overdue</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-success">Issued</span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Transaction History & Statistics -->
+        <div class="col-lg-4">
+            <!-- Statistics Cards -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0"><i class="bi bi-graph-up me-2"></i>Statistics</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-6 mb-3">
+                                    <div class="border-end">
+                                        <div class="h4 mb-0 text-primary">{{ stats.total_transactions }}</div>
+                                        <small class="text-muted">Total Transactions</small>
+                                    </div>
+                                </div>
+                                <div class="col-6 mb-3">
+                                    <div class="h4 mb-0 text-success">{{ stats.completed_returns }}</div>
+                                    <small class="text-muted">Books Returned</small>
+                                </div>
+                                <div class="col-6">
+                                    <div class="h4 mb-0 text-warning">{{ stats.overdue_books }}</div>
+                                    <small class="text-muted">Overdue Books</small>
+                                </div>
+                                <div class="col-6">
+                                    <div class="h4 mb-0 text-info">₹{{ "%.2f"|format(stats.total_fines or 0) }}</div>
+                                    <small class="text-muted">Total Fines</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transaction History -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Transaction History</h5>
+                    <div class="btn-group btn-group-sm" role="group">
+                        <button class="btn btn-outline-primary btn-sm" onclick="exportPatronHistory()">
+                            <i class="bi bi-download"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if transactions %}
+                        <div class="timeline">
+                            {% for transaction in transactions %}
+                            <div class="timeline-item">
+                                <div class="timeline-marker {% if transaction.status == 'issued' %}bg-warning{% else %}bg-success{% endif %}"></div>
+                                <div class="timeline-content">
+                                    <div class="fw-bold">
+                                        {% if transaction.status == 'issued' %}
+                                            <i class="bi bi-arrow-up-circle text-warning me-1"></i>Book Issued
+                                        {% else %}
+                                            <i class="bi bi-arrow-down-circle text-success me-1"></i>Book Returned
+                                        {% endif %}
+                                    </div>
+                                    <div class="text-muted small">
+                                        {{ transaction.created_at.strftime('%Y-%m-%d') if transaction.created_at else 'N/A' }}
+                                    </div>
+                                    <div class="mt-1">
+                                        <strong>{{ transaction.book.title }}</strong><br>
+                                        <small class="text-muted">{{ transaction.book.accession_number }}</small>
+                                    </div>
+                                    {% if transaction.status == 'issued' %}
+                                        <div class="mt-1">
+                                            <small class="text-muted">
+                                                <i class="bi bi-calendar-event me-1"></i>Due: {{ transaction.due_date }}
+                                            </small>
+                                        </div>
+                                    {% endif %}
+                                    {% if transaction.fine_amount and transaction.fine_amount > 0 %}
+                                        <div class="mt-1">
+                                            <span class="badge bg-warning text-dark">
+                                                <i class="bi bi-currency-rupee me-1"></i>Fine: ₹{{ "%.2f"|format(transaction.fine_amount or 0) }}
+                                            </span>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center text-muted py-4">
+                            <i class="bi bi-clock-history fs-1 mb-3"></i>
+                            <p>No transaction history</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.patron-info-item {
+    margin-bottom: 1.5rem;
+}
+
+.patron-info-item label {
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.timeline {
+    position: relative;
+    padding-left: 2rem;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 0.75rem;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #dee2e6;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+}
+
+.timeline-item:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -2rem;
+    top: 0;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid #dee2e6;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -2rem;
+    top: 0;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    z-index: 1;
+}
+
+.timeline-content {
+    margin-left: 0.5rem;
+}
+</style>
+
+<script>
+function editPatron() {
+    var rollNo = '{{ patron.roll_no }}';
+    var name = '{{ patron.name }}';
+    var type = '{{ patron.patron_type }}';
+    var department = '{{ patron.department or "" }}';
+    var division = '{{ patron.division or "" }}';
+    var email = '{{ patron.email or "" }}';
+    var phone = '{{ patron.phone or "" }}';
+    var status = '{{ patron.status }}';
+    var maxBooks = '{{ patron.max_books }}';
+
+    var params = 'roll_no=' + encodeURIComponent(rollNo) +
+                 '&name=' + encodeURIComponent(name) +
+                 '&type=' + encodeURIComponent(type) +
+                 '&department=' + encodeURIComponent(department) +
+                 '&division=' + encodeURIComponent(division) +
+                 '&email=' + encodeURIComponent(email) +
+                 '&phone=' + encodeURIComponent(phone) +
+                 '&status=' + encodeURIComponent(status) +
+                 '&max_books=' + encodeURIComponent(maxBooks);
+
+    window.location.href = '{{ url_for("patrons.add_patron") }}?' + params;
+}
+
+function exportPatronHistory() {
+    window.location.href = '{{ url_for("patrons.export_patron_history", patron_id=patron.id) }}';
+}
+</script>
+{% endblock %}

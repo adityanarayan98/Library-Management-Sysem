@@ -1,0 +1,194 @@
+{% extends "opac/base.html" %}
+
+{% block title %}Library Catalog - Search Books{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- OPAC Header -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card bg-light">
+                <div class="card-body text-center">
+                    <h1 class="card-title"><i class="bi bi-book me-2"></i>{{ library_name }} Catalog</h1>
+                    <p class="card-text text-muted">Search and browse our collection of books</p>
+                    {% if patron_session %}
+                        <div class="mt-3">
+                            <span class="badge bg-success">Logged in as: {{ patron_session.name }} ({{ patron_session.roll_no }})</span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Section -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                        <input type="text" class="form-control" name="search" placeholder="Search by title, author, accession number, call number, or ISBN..." value="{{ search }}">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" name="category">
+                        <option value="">All Categories</option>
+                        {% for category in categories %}
+                            <option value="{{ category.name }}" {% if category_filter == category.name %}selected{% endif %}>{{ category.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select" name="status">
+                        <option value="">All Status</option>
+                        <option value="available" {% if status_filter == 'available' %}selected{% endif %}>Available</option>
+                        <option value="issued" {% if status_filter == 'issued' %}selected{% endif %}>Issued</option>
+                    </select>
+                </div>
+                <div class="col-md-1">
+                    <button type="submit" class="btn btn-primary w-100">Search</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Search Results -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-grid-3x2 me-2"></i>Search Results</h5>
+            <div class="d-flex gap-2 align-items-center">
+                <small class="text-muted">Total: <span id="bookCount">{{ total_books }}</span> books</small>
+            </div>
+        </div>
+        <div class="card-body">
+            {% if books %}
+                <!-- Desktop Table View -->
+                <div class="table-responsive d-none d-lg-block">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Accession No.</th>
+                                <th>Call No.</th>
+                                <th>Title</th>
+                                <th>Author</th>
+                                <th>Category</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for book in books %}
+                            <tr>
+                                <td><strong>{{ book.accession_number }}</strong></td>
+                                <td>{{ book.call_number or '-' }}</td>
+                                <td>
+                                    <div>
+                                        <strong>{{ book.title }}</strong>
+                                        {% if book.isbn %}
+                                            <br><small class="text-muted">ISBN: {{ book.isbn }}</small>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td>{{ book.author }}</td>
+                                <td>{{ book.category.name if book.category else 'Uncategorized' }}</td>
+                                <td>
+                                    {% if book.status == 'available' %}
+                                        <span class="badge bg-success">Available</span>
+                                    {% elif book.status == 'issued' %}
+                                        <span class="badge bg-warning">Issued</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ book.status.title() }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{{ url_for('opac.book_details', book_id=book.id) }}" class="btn btn-outline-info" title="View Details">
+                                            <i class="bi bi-eye"></i> Details
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Mobile Card View -->
+                <div class="d-lg-none">
+                    {% for book in books %}
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-8">
+                                    <h6 class="card-title mb-1">
+                                        <span class="badge bg-secondary">{{ book.accession_number }}</span>
+                                        {% if book.call_number %}
+                                            <small class="text-muted ms-1">{{ book.call_number }}</small>
+                                        {% endif %}
+                                    </h6>
+                                    <h6 class="mb-2">{{ book.title }}</h6>
+                                    <p class="card-text small mb-1">by {{ book.author }}</p>
+                                    <p class="card-text small text-muted">{{ book.category.name if book.category else 'Uncategorized' }}</p>
+                                </div>
+                                <div class="col-4 text-end">
+                                    <div class="d-flex flex-column gap-1">
+                                        {% if book.status == 'available' %}
+                                            <span class="badge bg-success fs-7">Available</span>
+                                        {% elif book.status == 'issued' %}
+                                            <span class="badge bg-warning fs-7">Issued</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary fs-7">{{ book.status.title() }}</span>
+                                        {% endif %}
+                                        <div class="btn-group-vertical btn-group-sm mt-2">
+                                            <a href="{{ url_for('opac.book_details', book_id=book.id) }}" class="btn btn-outline-info btn-sm">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Pagination -->
+                <nav aria-label="Search results pagination" class="mt-4">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="text-muted mb-0">
+                                Showing {{ books|length }} books per page |
+                                Page {{ page }} of {{ total_pages }}
+                            </p>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <div class="btn-group" role="group">
+                                {% if has_prev %}
+                                <a href="{{ url_for('opac.search', page=page-1, search=search, category=category_filter, status=status_filter) }}" class="btn btn-outline-secondary btn-sm">
+                                    <i class="bi bi-chevron-left"></i> Previous
+                                </a>
+                                {% endif %}
+
+                                {% if has_next %}
+                                <a href="{{ url_for('opac.search', page=page+1, search=search, category=category_filter, status=status_filter) }}" class="btn btn-outline-secondary btn-sm">
+                                    Next <i class="bi bi-chevron-right"></i>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+            {% else %}
+                <div class="text-center text-muted py-5">
+                    <i class="bi bi-search fs-1 mb-3"></i>
+                    <p>No books found matching your search criteria</p>
+                    <a href="{{ url_for('opac.search') }}" class="btn btn-primary">Clear Search</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

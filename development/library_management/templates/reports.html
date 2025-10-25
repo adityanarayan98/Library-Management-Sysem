@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block title %}Reports - {{ library_name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="row align-items-center">
+            <div class="col">
+                <h1 class="mb-0"><i class="bi bi-bar-chart me-2"></i>Reports</h1>
+                <p class="text-muted mb-0">Library analytics and insights</p>
+            </div>
+            <div class="col-auto">
+                <button class="btn btn-outline-primary" onclick="exportReport()">
+                    <i class="bi bi-download me-2"></i>Export Report
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card bg-primary text-white h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <div class="text-white-50 small text-uppercase mb-1">Total Books</div>
+                            <div class="h4 mb-0">{{ total_books }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-book fs-2 text-white-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card bg-success text-white h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <div class="text-white-50 small text-uppercase mb-1">Available Books</div>
+                            <div class="h4 mb-0">{{ available_books }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-check-circle fs-2 text-white-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card bg-warning text-white h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <div class="text-white-50 small text-uppercase mb-1">Books Issued</div>
+                            <div class="h4 mb-0">{{ issued_books }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-arrow-up-circle fs-2 text-white-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card bg-info text-white h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <div class="text-white-50 small text-uppercase mb-1">Active Patrons</div>
+                            <div class="h4 mb-0">{{ active_patrons }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-people fs-2 text-white-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Overdue Books -->
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-exclamation-triangle me-2"></i>Overdue Books</h5>
+                    <span class="badge bg-danger">{{ overdue_count }}</span>
+                </div>
+                <div class="card-body">
+                    <div class="text-center text-muted py-3">
+                        <i class="bi bi-check-circle fs-2 text-success mb-2"></i>
+                        <p class="mb-0">No overdue books!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Library Statistics -->
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>Library Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center">
+                        <h4 class="text-primary mb-3">{{ total_books }}</h4>
+                        <p class="text-muted mb-2">Total Books in Collection</p>
+                        <div class="row text-center mt-4">
+                            <div class="col-6">
+                                <h5 class="text-success">{{ available_books }}</h5>
+                                <small class="text-muted">Available</small>
+                            </div>
+                            <div class="col-6">
+                                <h5 class="text-warning">{{ issued_books }}</h5>
+                                <small class="text-muted">Issued</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Reports -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-clipboard-data me-2"></i>Detailed Analytics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <h4 class="text-primary mb-1">{{ total_books }}</h4>
+                            <small class="text-muted">Total Books in Library</small>
+                        </div>
+                        <div class="col-md-4">
+                            <h4 class="text-success mb-1">{{ available_books }}</h4>
+                            <small class="text-muted">Currently Available</small>
+                        </div>
+                        <div class="col-md-4">
+                            <h4 class="text-warning mb-1">{{ issued_books }}</h4>
+                            <small class="text-muted">Currently Issued</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function exportReport() {
+    alert('Export functionality coming soon!');
+}
+</script>
+{% endblock %}

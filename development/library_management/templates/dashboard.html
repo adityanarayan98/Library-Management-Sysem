@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - {{ library_name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="row align-items-center">
+            <div class="col">
+                <h1 class="mb-0"><i class="bi bi-speedometer2 me-2"></i>Dashboard</h1>
+                <p class="text-muted mb-0">Welcome back, {{ current_user.username }}!</p>
+            </div>
+            <div class="col-auto">
+                <small class="text-muted">{{ now.strftime('%A, %B %d, %Y') }}</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stat-card h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <div class="text-white-50 small text-uppercase mb-1">Total Patrons</div>
+                            <div class="h4 mb-0 text-white">{{ total_patrons }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-people fs-2 text-white-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stat-card h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <div class="text-white-50 small text-uppercase mb-1">Total Books</div>
+                            <div class="h4 mb-0 text-white">{{ total_books }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-book fs-2 text-white-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card bg-success text-white h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <div class="text-white-50 small text-uppercase mb-1">Available Books</div>
+                            <div class="h4 mb-0">{{ available_books }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-check-circle fs-2 text-white-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card bg-warning text-white h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <div class="text-white-50 small text-uppercase mb-1">Books Issued</div>
+                            <div class="h4 mb-0">{{ issued_books }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-arrow-up-circle fs-2 text-white-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Quick Actions -->
+        <div class="col-lg-12">
+            <!-- Quick Actions -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-lightning me-2"></i>Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <a href="{{ url_for('patrons.patrons') }}" class="btn btn-primary w-100">
+                                <i class="bi bi-person-plus me-2"></i>Manage Patrons
+                            </a>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <a href="{{ url_for('books.books') }}" class="btn btn-success w-100">
+                                <i class="bi bi-book-plus me-2"></i>Manage Books
+                            </a>
+                        </div>
+                    </div>
+                    <div class="row">
+                        {% if current_user.is_admin() %}
+                        <div class="col-md-6 mb-3">
+                            <a href="{{ url_for('auth.create_librarian') }}" class="btn btn-info w-100">
+                                <i class="bi bi-person-add me-2"></i>Create Librarian
+                            </a>
+                        </div>
+                        {% endif %}
+                        <div class="col-md-6 mb-3">
+                            <a href="{{ url_for('settings.settings') }}" class="btn btn-secondary w-100">
+                                <i class="bi bi-gear me-2"></i>System Settings
+                            </a>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <a href="{{ url_for('settings.reports') }}" class="btn btn-secondary w-100">
+                                <i class="bi bi-bar-chart me-2"></i>View Reports
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <button class="btn btn-outline-primary w-100" onclick="refreshData()">
+                                <i class="bi bi-arrow-clockwise me-2"></i>Refresh Data
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Library Status -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Library Status</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <h3 class="text-primary mb-1">{{ available_books }}</h3>
+                            <small class="text-muted">Books Available</small>
+                        </div>
+                        <div class="col-md-3">
+                            <h3 class="text-warning mb-1">{{ issued_books }}</h3>
+                            <small class="text-muted">Books Issued</small>
+                        </div>
+                        <div class="col-md-3">
+                            <h3 class="text-info mb-1">{{ total_patrons }}</h3>
+                            <small class="text-muted">Active Patrons</small>
+                        </div>
+                        <div class="col-md-3">
+                            <h3 class="text-danger mb-1">{{ overdue_transactions }}</h3>
+                            <small class="text-muted">Overdue Books</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function refreshData() {
+    window.location.reload();
+}
+</script>
+{% endblock %}

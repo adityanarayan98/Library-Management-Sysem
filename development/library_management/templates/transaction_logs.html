@@ -1,0 +1,407 @@
+{% extends "base.html" %}
+
+{% block title %}Transaction Logs - {{ library_name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="row align-items-center">
+            <div class="col">
+                <h1 class="mb-0"><i class="bi bi-receipt me-2"></i>Transaction Logs</h1>
+                <p class="text-muted mb-0">View book issue and return history</p>
+            </div>
+            <div class="col-auto">
+                <div class="btn-group" role="group">
+                    <button class="btn btn-outline-primary" onclick="exportLogs()">
+                        <i class="bi bi-download me-2"></i>Export
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="refreshLogs()">
+                        <i class="bi bi-arrow-clockwise me-2"></i>Refresh
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-funnel me-2"></i>Filters</h5>
+        </div>
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-3">
+                    <label for="start_date" class="form-label">Start Date</label>
+                    <input type="date" class="form-control" id="start_date" name="start_date"
+                           value="{{ start_date }}" max="{{ end_date }}">
+                </div>
+                <div class="col-md-3">
+                    <label for="end_date" class="form-label">End Date</label>
+                    <input type="date" class="form-control" id="end_date" name="end_date"
+                           value="{{ end_date }}" max="{{ end_date }}">
+                </div>
+                <div class="col-md-3">
+                    <label for="transaction_type" class="form-label">Transaction Type</label>
+                    <select class="form-select" id="transaction_type" name="type">
+                        <option value="all" {% if transaction_type == 'all' %}selected{% endif %}>All Transactions</option>
+                        <option value="issued" {% if transaction_type == 'issued' %}selected{% endif %}>Issues Only</option>
+                        <option value="returned" {% if transaction_type == 'returned' %}selected{% endif %}>Returns Only</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">&nbsp;</label>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-search me-2"></i>Filter
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card bg-primary text-white h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <div class="text-white-50 small text-uppercase mb-1">Total Issues</div>
+                            <div class="h4 mb-0">{{ stats.total_issues }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-arrow-up-circle fs-2 text-white-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card bg-success text-white h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <div class="text-white-50 small text-uppercase mb-1">Total Returns</div>
+                            <div class="h4 mb-0">{{ stats.total_returns }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-arrow-down-circle fs-2 text-white-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card bg-warning text-white h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <div class="text-white-50 small text-uppercase mb-1">Total Fines</div>
+                            <div class="h4 mb-0">₹{{ "%.2f"|format(stats.total_fines or 0) }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-currency-rupee fs-2 text-white-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card bg-info text-white h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <div class="text-white-50 small text-uppercase mb-1">Overdue Returns</div>
+                            <div class="h4 mb-0">{{ stats.overdue_returns }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-exclamation-triangle fs-2 text-white-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transaction Logs Table -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-table me-2"></i>Transaction History</h5>
+            <div class="d-flex align-items-center">
+                <small class="text-muted me-2">
+                    Showing {{ ((page - 1) * per_page) + 1 }} -
+                    {{ ((page - 1) * per_page) + (transactions | length) }} of {{ total_pages * per_page }}
+                </small>
+            </div>
+        </div>
+        <div class="card-body">
+            {% if transactions %}
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Transaction ID</th>
+                                <th>Date</th>
+                                <th>Patron</th>
+                                <th>Book</th>
+                                <th>Type</th>
+                                <th>Issue Date</th>
+                                <th>Due Date</th>
+                                <th>Return Date</th>
+                                <th>Fine</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for transaction in transactions %}
+                                <tr>
+                                    <td>
+                                        <span class="badge bg-secondary">#{{ transaction[0] }}</span>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">
+                                            {{ transaction[10].split(' ')[0] if transaction[10] else 'N/A' }}
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <strong>{{ transaction[12] }}</strong><br>
+                                            <small class="text-muted">{{ transaction[13] }}</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <strong>{{ transaction[15] }}</strong><br>
+                                            <small class="text-muted">{{ transaction[14] }}</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if transaction[6] == 'issued' %}
+                                            <span class="badge bg-success">Issue</span>
+                                        {% elif transaction[6] == 'returned' %}
+                                            <span class="badge bg-primary">Return</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">{{ transaction[6] }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-dark">
+                                            {{ transaction[3] or 'N/A' }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-dark">
+                                            {{ transaction[4] or 'N/A' }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if transaction[5] %}
+                                            <span class="badge bg-info">
+                                                {{ transaction[5] }}
+                                            </span>
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if transaction[7] and transaction[7] > 0 %}
+                                            <span class="badge bg-warning text-dark">
+                                                ₹{{ "%.2f"|format(transaction[7] or 0) }}
+                                            </span>
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if transaction[6] == 'issued' %}
+                                            <span class="badge bg-success">Active</span>
+                                        {% elif transaction[6] == 'returned' %}
+                                            <span class="badge bg-secondary">Completed</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">{{ transaction[6] }}</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                {% if total_pages > 1 %}
+                    <nav aria-label="Transaction logs pagination" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if has_prev %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('transactions.transaction_logs', page=page-1, start_date=start_date, end_date=end_date, type=transaction_type) }}">
+                                        <i class="bi bi-chevron-left"></i> Previous
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            {% for page_num in range(1, total_pages + 1) %}
+                                {% if page_num == page %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ page_num }}</span>
+                                    </li>
+                                {% elif page_num == 1 or page_num == total_pages or (page_num >= page - 2 and page_num <= page + 2) %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ url_for('transactions.transaction_logs', page=page_num, start_date=start_date, end_date=end_date, type=transaction_type) }}">
+                                            {{ page_num }}
+                                        </a>
+                                    </li>
+                                {% elif page_num == page - 3 or page_num == page + 3 %}
+                                    <li class="page-item disabled">
+                                        <span class="page-link">...</span>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('transactions.transaction_logs', page=page+1, start_date=start_date, end_date=end_date, type=transaction_type) }}">
+                                        Next <i class="bi bi-chevron-right"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+            {% else %}
+                <div class="text-center py-5">
+                    {% if setup_mode %}
+                        <!-- First time setup / No database state -->
+                        <div class="row justify-content-center">
+                            <div class="col-lg-8">
+                                <i class="bi bi-database-exclamation fs-1 text-warning mb-4"></i>
+                                <h3 class="text-warning mb-3">Database Not Initialized</h3>
+                                <p class="text-muted mb-4">Your library database needs to be set up before you can view transaction logs. Let's get started!</p>
+
+                                <div class="row g-3 mb-4">
+                                    <div class="col-md-4">
+                                        <div class="card border-primary">
+                                            <div class="card-body text-center">
+                                                <i class="bi bi-person-plus fs-2 text-primary mb-2"></i>
+                                                <h6>Add Patrons</h6>
+                                                <small class="text-muted">Register library users</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="card border-success">
+                                            <div class="card-body text-center">
+                                                <i class="bi bi-book fs-2 text-success mb-2"></i>
+                                                <h6>Add Books</h6>
+                                                <small class="text-muted">Add books to collection</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="card border-info">
+                                            <div class="card-body text-center">
+                                                <i class="bi bi-arrow-left-right fs-2 text-info mb-2"></i>
+                                                <h6>Issue Books</h6>
+                                                <small class="text-muted">Start lending books</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-center gap-2 flex-wrap">
+                                    <a href="{{ url_for('patrons.add_patron') }}" class="btn btn-primary">
+                                        <i class="bi bi-person-plus me-2"></i>Add First Patron
+                                    </a>
+                                    <a href="{{ url_for('books.add_book') }}" class="btn btn-success">
+                                        <i class="bi bi-book me-2"></i>Add First Book
+                                    </a>
+                                    <a href="{{ url_for('transactions.issue_book') }}" class="btn btn-info">
+                                        <i class="bi bi-arrow-up-circle me-2"></i>Issue First Book
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <!-- No transactions in current filter -->
+                        <i class="bi bi-receipt-cutoff fs-1 text-muted mb-3"></i>
+                        <h4 class="text-muted">No Transactions Found</h4>
+                        <p class="text-muted mb-4">No transactions match your current filter criteria.</p>
+
+                        <div class="row justify-content-center">
+                            <div class="col-md-6">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h6 class="card-title"><i class="bi bi-lightbulb me-2"></i>What can you do?</h6>
+                                        <ul class="list-unstyled mb-0">
+                                            <li class="mb-2">
+                                                <i class="bi bi-calendar-event text-primary me-2"></i>
+                                                <strong>Adjust Date Range:</strong> Try a different time period
+                                            </li>
+                                            <li class="mb-2">
+                                                <i class="bi bi-funnel text-success me-2"></i>
+                                                <strong>Change Filter:</strong> Include all transaction types
+                                            </li>
+                                            <li class="mb-2">
+                                                <i class="bi bi-plus-circle text-info me-2"></i>
+                                                <strong>Start Using:</strong> Issue some books to create transactions
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <button class="btn btn-outline-primary me-2" onclick="clearFilters()">
+                                <i class="bi bi-x-circle me-2"></i>Clear Filters
+                            </button>
+                            <a href="{{ url_for('transactions.issue_book') }}" class="btn btn-primary">
+                                <i class="bi bi-arrow-up-circle me-2"></i>Issue a Book
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+function exportLogs() {
+    const startDate = document.getElementById('start_date').value;
+    const endDate = document.getElementById('end_date').value;
+    const type = document.getElementById('transaction_type').value;
+
+    let url = `/export_transaction_logs?start_date=${startDate}&end_date=${endDate}&type=${type}`;
+    window.open(url, '_blank');
+}
+
+function refreshLogs() {
+    window.location.reload();
+}
+
+function clearFilters() {
+    document.getElementById('start_date').value = '';
+    document.getElementById('end_date').value = '';
+    document.getElementById('transaction_type').value = 'all';
+    document.forms[0].submit();
+}
+
+// Set default dates if empty
+document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date().toISOString().split('T')[0];
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
+    if (!document.getElementById('start_date').value) {
+        document.getElementById('start_date').value = thirtyDaysAgo;
+    }
+    if (!document.getElementById('end_date').value) {
+        document.getElementById('end_date').value = today;
+    }
+});
+</script>
+{% endblock %}

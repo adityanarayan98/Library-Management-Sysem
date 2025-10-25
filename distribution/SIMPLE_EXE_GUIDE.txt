@@ -1,0 +1,48 @@
+# SIMPLE EXE CREATION GUIDE
+# Place this file in your distribution folder for easy reference
+
+## STEP-BY-STEP INSTRUCTIONS:
+
+### Step 1: Open Command Prompt
+- Press Win+R, type "cmd", press Enter
+- OR search for "Command Prompt" in Start menu
+
+### Step 2: Navigate to exe builder folder
+```
+cd "distribution/exe_builder/standalone_exe"
+```
+
+### Step 3: Run the build script
+```
+build_exe.bat
+```
+
+### Step 4: Wait for completion
+- The script will check Python installation
+- Install PyInstaller automatically
+- Build the executable (takes 2-5 minutes)
+- Create launcher script
+
+### Step 5: Find your exe file
+Location: development/library_management/dist/LibraryManagementSystem/
+Main file: LibraryManagementSystem.exe
+
+### Step 6: Test the application
+- Double-click: "Library Management System.exe.bat"
+- OR run the exe directly
+- Open browser to: http://localhost:5000
+
+## WHAT YOU GET:
+✅ Single .exe file that works on any Windows computer
+✅ No Python installation required on target computers
+✅ All data persists between application restarts
+✅ Works from any folder location (USB drives, etc.)
+✅ Complete library management system
+
+## TROUBLESHOOTING:
+- If "Python not found": Install Python 3.7+ from python.org
+- If "PyInstaller fails": Check internet connection
+- If build fails: Ensure 500MB free disk space
+
+## DISTRIBUTION:
+Just copy the entire folder to any Windows computer and double-click the exe.bat file!

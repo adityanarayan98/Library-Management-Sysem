@@ -1,0 +1,40 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Python files should use LF
+*.py text eol=lf
+*.txt text eol=lf
+*.md text eol=lf
+
+# Batch files should use CRLF on Windows
+*.bat text eol=crlf
+
+# HTML files should use LF
+*.html text eol=lf
+
+# CSS and JavaScript files should use LF
+*.css text eol=lf
+*.js text eol=lf
+
+# Configuration files
+*.yml text eol=lf
+*.yaml text eol=lf
+*.json text eol=lf
+
+# Documentation
+*.rst text eol=lf
+*.tex text eol=lf
+
+# Make files should use LF
+Makefile text eol=lf
+*.make text eol=lf
+
+# Shell scripts should use LF
+*.sh text eol=lf
+
+# Exclude from Git export
+*.db export-ignore
+*.pyc export-ignore
+__pycache__ export-ignore
+*.log export-ignore
+.env export-ignore

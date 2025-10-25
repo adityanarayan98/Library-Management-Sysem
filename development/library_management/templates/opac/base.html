@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Library Catalog{% endblock %} - OPAC</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+            border-color: #2980b9;
+        }
+
+        .table th {
+            background-color: var(--light-color);
+            border-top: none;
+            font-weight: 600;
+        }
+
+        .form-control:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+        }
+
+        .alert {
+            border-radius: 0.5rem;
+            border: none;
+        }
+
+        .footer {
+            background-color: var(--primary-color);
+            color: white;
+            text-align: center;
+            padding: 1rem;
+            margin-top: 2rem;
+        }
+
+        .opac-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .opac-navbar {
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .opac-navbar .navbar-nav .nav-link {
+            color: #2c3e50 !important;
+            font-weight: 500;
+        }
+
+        .opac-navbar .navbar-nav .nav-link:hover {
+            color: #3498db !important;
+        }
+
+        .opac-navbar .navbar-brand {
+            color: #2c3e50 !important;
+            font-weight: bold;
+        }
+
+        .search-box {
+            background-color: white;
+            border-radius: 0.5rem;
+            padding: 0.5rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        }
+
+        .search-box .input-group-text {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .search-box .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(44, 62, 80, 0.25);
+        }
+
+        .badge {
+            font-size: 0.75rem;
+        }
+
+        .text-muted {
+            color: #6c757d !important;
+        }
+
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .form-floating > label {
+            padding: 1rem 0.75rem;
+        }
+
+        .input-group-text {
+            background-color: var(--light-color);
+            border-color: #ced4da;
+        }
+
+        /* Enhanced styles for patrons page */
+        .patron-card {
+            border-left: 4px solid var(--accent-color);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .patron-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+
+        .badge.fs-7 {
+            font-size: 0.7rem;
+        }
+
+        .btn-group-sm .btn {
+            padding: 0.2rem 0.4rem;
+        }
+
+        @media (max-width: 576px) {
+            .opac-header {
+                padding: 1rem 0;
+                text-align: center;
+            }
+
+            .opac-header h1 {
+                font-size: 1.5rem;
+            }
+
+            .btn-group {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .btn-group .btn {
+                border-radius: 0.375rem !important;
+                margin-bottom: 0.25rem;
+            }
+
+            .search-box .input-group {
+                flex-direction: column;
+            }
+
+            .search-box .input-group-text,
+            .search-box .btn-outline-secondary {
+                border-radius: 0.375rem !important;
+                margin-top: 0.25rem;
+            }
+        }
+
+        /* Search dropdown styling - simple and clean */
+        .search-input-container {
+            position: relative;
+        }
+
+        .search-results-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #fff;
+            border: 1px solid #ced4da;
+            border-top: none;
+            border-radius: 0 0 0.375rem 0.375rem;
+            max-height: 350px;
+            overflow-y: auto;
+            z-index: 1050;
+            display: none;
+            box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.15);
+            margin-top: -1px;
+        }
+
+        /* Enhanced dropdown styling for proper visibility */
+        .dropdown-menu {
+            z-index: 1060 !important;
+            border: none;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            border-radius: 0.5rem;
+            padding: 0.5rem 0;
+            margin-top: 0.25rem;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px) saturate(180%);
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .dropdown-menu.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            padding: 0.5rem 1.5rem;
+            color: #495057;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dropdown-item:hover,
+        .dropdown-item:focus {
+            background: linear-gradient(135deg, rgba(52, 152, 219, 0.1) 0%, rgba(155, 89, 182, 0.1) 100%);
+            color: #2c3e50;
+            transform: translateX(5px);
+            padding-left: 2rem;
+        }
+
+        .dropdown-item:hover {
+            background: linear-gradient(135deg, rgba(52, 152, 219, 0.15) 0%, rgba(155, 89, 182, 0.15) 100%);
+            box-shadow: inset 0 0 10px rgba(52, 152, 219, 0.1);
+        }
+
+        .dropdown-item i {
+            margin-right: 0.5rem;
+            width: 16px;
+            text-align: center;
+        }
+
+        .dropdown-divider {
+            margin: 0.5rem 0;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .dropdown-toggle::after {
+            transition: transform 0.3s ease;
+        }
+
+        .dropdown-toggle[aria-expanded="true"]::after {
+            transform: rotate(180deg);
+        }
+
+        /* Enhanced dropdown animations */
+        @keyframes dropdownFadeIn {
+            0% {
+                opacity: 0;
+                transform: translateY(-10px) scale(0.95);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .dropdown-menu.show {
+            animation: dropdownFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Mobile responsive dropdown improvements */
+        @media (max-width: 768px) {
+            .dropdown-menu {
+                box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.2);
+                border-radius: 0.25rem;
+            }
+
+            .dropdown-item {
+                padding: 0.75rem 1rem;
+            }
+        }
+
+        .navbar {
+            z-index: 1030 !important;
+        }
+
+        /* Ensure dropdown appears above all other elements */
+        .dropdown-menu {
+            z-index: 1070 !important;
+            isolation: isolate;
+        }
+
+        /* Fix any element that might be covering dropdown */
+        .opac-navbar {
+            position: relative;
+            z-index: 1030 !important;
+        }
+
+        /* Ensure dropdown positioning is correct */
+        .dropdown {
+            position: relative;
+        }
+
+        .search-results-dropdown.show {
+            display: block;
+        }
+
+        .search-result-item {
+            padding: 0.5rem 0.75rem;
+            cursor: pointer;
+            color: #212529;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            transition: background-color 0.15s ease-in-out;
+        }
+
+        .search-result-item:hover,
+        .search-result-item.highlighted {
+            background-color: #6c757d;
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <!-- OPAC Navigation -->
+    <nav class="navbar navbar-expand-lg opac-navbar">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('opac.opac_home') }}">
+                <i class="bi bi-book-half me-2"></i>
+                {{ library_name }} Catalog
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#opacNavbar">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="opacNavbar">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'opac.opac_home' %}active{% endif %}"
+                           href="{{ url_for('opac.opac_home') }}">
+                            <i class="bi bi-house-door me-1"></i>Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'opac.categories' %}active{% endif %}"
+                           href="{{ url_for('opac.categories') }}">
+                            <i class="bi bi-grid-3x2 me-1"></i>Browse Categories
+                        </a>
+                    </li>
+                    {% if patron_session %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'patron_auth.patron_dashboard' %}active{% endif %}"
+                           href="{{ url_for('patron_auth.patron_dashboard') }}">
+                            <i class="bi bi-person me-1"></i>My Dashboard
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+
+                <ul class="navbar-nav">
+                    {% if patron_session %}
+                        <!-- DEBUG: Patron session found -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-person-circle me-1"></i>{{ patron_session.name }}
+                                <small class="text-muted">({{ patron_session.roll_no }})</small>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ url_for('patron_auth.patron_dashboard') }}">
+                                    <i class="bi bi-speedometer2 me-2"></i>My Dashboard
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('patron_auth.change_password') }}">
+                                    <i class="bi bi-key me-2"></i>Change Password
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ url_for('patron_auth.patron_logout') }}">
+                                    <i class="bi bi-box-arrow-right me-2"></i>Logout
+                                </a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <!-- DEBUG: No patron session -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('patron_auth.patron_login') }}">
+                                <i class="bi bi-box-arrow-in-right me-1"></i>Login
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container-fluid mt-3">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Page Content -->
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 | <a href="https://sites.google.com/view/adityanarayansahoo/home" target="_blank" style="color: rgba(255, 255, 255, 0.8); text-decoration: none;">Aditya Narayan Sahoo</a></p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Custom JavaScript -->
+    <script>
+        // Auto-hide alerts after 5 seconds
+        setTimeout(function() {
+            $('.alert').fadeOut();
+        }, 5000);
+
+        // Confirm delete actions
+        function confirmDelete(message = 'Are you sure you want to delete this item?') {
+            return confirm(message);
+        }
+
+        // Search functionality for OPAC
+        function setupSearch(inputId, resultsId, searchUrl) {
+            $(`#${inputId}`).autocomplete({
+                source: function(request, response) {
+                    $.ajax({
+                        url: searchUrl,
+                        data: { q: request.term },
+                        success: function(data) {
+                            response(data);
+                        }
+                    });
+                },
+                minLength: 2,
+                select: function(event, ui) {
+                    $(`#${inputId}`).val(ui.item.value);
+                    return false;
+                }
+            });
+        }
+
+        // Initialize search on page load
+        $(document).ready(function() {
+            // Debug session information
+            console.log('DEBUG: patron_session =', '{{ patron_session.name if patron_session else "None" }}');
+            console.log('DEBUG: session patron_id =', '{{ session.get("patron_id", "None") }}');
+            console.log('DEBUG: library_name =', '{{ library_name }}');
+
+            // Search functionality will be added when needed
+        });
+    </script>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

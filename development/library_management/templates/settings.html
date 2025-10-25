@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+
+{% block title %}{{ library_name }} Settings - {{ current_user.username }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+            <div class="position-sticky pt-3">
+                <ul class="nav nav-pills flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('core.dashboard') }}">
+                            <i class="bi bi-speedometer2 me-2"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('books.books') }}">
+                            <i class="bi bi-book me-2"></i>Books
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('patrons.patrons') }}">
+                            <i class="bi bi-people me-2"></i>Patrons
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('settings.reports') }}">
+                            <i class="bi bi-bar-chart me-2"></i>Reports
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('settings.settings') }}">
+                            <i class="bi bi-gear me-2"></i>Settings
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('backup.backup_data') }}">
+                            <i class="bi bi-archive me-2"></i>Backup
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Library Settings</h1>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Library Configuration</h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="POST">
+                                <div class="mb-3">
+                                    <label for="fine_per_day" class="form-label">Fine Amount per Day (₹)</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">₹</span>
+                                        <input type="number" class="form-control" id="fine_per_day" name="fine_per_day"
+                                               value="{{ current_settings.get('fine_per_day', 1.0) }}" step="0.5" min="0" required>
+                                    </div>
+                                    <div class="form-text">
+                                        <small class="text-muted">💰 Daily fine charged for each overdue book
+                                        </small>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label for="student_due_days" class="form-label">Student Due Days</label>
+                                            <input type="number" class="form-control" id="student_due_days" name="student_due_days"
+                                                   value="{{ current_settings.get('student_due_days', 14) }}" min="1" max="90" required>
+                                            <div class="form-text">
+                                                <small class="text-muted">  📚 Loan period for undergraduate and graduate students
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label for="faculty_due_days" class="form-label">Faculty Due Days</label>
+                                            <input type="number" class="form-control" id="faculty_due_days" name="faculty_due_days"
+                                                   value="{{ current_settings.get('faculty_due_days', 30) }}" min="1" max="180" required>
+                                            <div class="form-text">👨‍🏫 Extended loan period for teaching staff and researchers
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label for="staff_due_days" class="form-label">Staff Due Days</label>
+                                            <input type="number" class="form-control" id="staff_due_days" name="staff_due_days"
+                                                   value="{{ current_settings.get('staff_due_days', 21) }}" min="1" max="90" required>
+                                            <div class="form-text">
+                                                <small class="text-muted">👨‍💼 Loan period for administrative and support staff (Days)
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label for="student_max_books" class="form-label">Student Max Books</label>
+                                            <input type="number" class="form-control" id="student_max_books" name="student_max_books"
+                                                   value="{{ current_settings.get('student_max_books', 3) }}" min="1" max="10" required>
+                                            <div class="form-text">
+                                                <small class="text-muted"> 📚 Maximum concurrent loans for students
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label for="faculty_max_books" class="form-label">Faculty Max Books</label>
+                                            <input type="number" class="form-control" id="faculty_max_books" name="faculty_max_books"
+                                                   value="{{ current_settings.get('faculty_max_books', 5) }}" min="1" max="20" required>
+                                            <div class="form-text">
+                                                <small class="text-muted"> 👨‍🏫 Maximum concurrent loans for faculty and researchers
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label for="staff_max_books" class="form-label">Staff Max Books</label>
+                                            <input type="number" class="form-control" id="staff_max_books" name="staff_max_books"
+                                                   value="{{ current_settings.get('staff_max_books', 4) }}" min="1" max="15" required>
+                                            <div class="form-text">
+                                                <small class="text-muted">👨‍💼 Maximum concurrent loans for administrative staff
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="library_name" class="form-label">Library Name</label>
+                                    <input type="text" class="form-control" id="library_name" name="library_name"
+                                           value="{{ current_settings.get('library_name', 'Library') }}" maxlength="100"
+                                           placeholder="Central Library">
+                                    <div class="form-text">
+                                        <small class="text-muted">🏛️ Official name that appears in headers and reports
+                                        </small>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="librarian_email" class="form-label">Librarian Email</label>
+                                    <input type="email" class="form-control" id="librarian_email" name="librarian_email"
+                                           value="{{ current_settings.get('librarian_email', 'library@example.com') }}" maxlength="120"
+                                           placeholder="library@university.edu">
+                                    <div class="form-text">
+                                        <small class="text-muted">
+                                            📧 Contact email for system notifications and administration
+                                        </small>
+                                    </div>
+                                </div>
+
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-check-circle me-2"></i>Save Settings
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Current Settings</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <strong>Fine per Day:</strong>
+                                <span class="text-primary">₹{{ current_settings.get('fine_per_day', 1.0) }}</span>
+                            </div>
+                            <div class="mb-3">
+                                <strong>Student Due Days:</strong>
+                                <span class="text-info">{{ current_settings.get('student_due_days', 14) }} days</span>
+                            </div>
+                            <div class="mb-3">
+                                <strong>Faculty Due Days:</strong>
+                                <span class="text-info">{{ current_settings.get('faculty_due_days', 30) }} days</span>
+                            </div>
+                            <div class="mb-3">
+                                <strong>Staff Due Days:</strong>
+                                <span class="text-info">{{ current_settings.get('staff_due_days', 21) }} days</span>
+                            </div>
+                            <div class="mb-3">
+                                <strong>Library Name:</strong>
+                                <span class="text-success">{{ current_settings.get('library_name', 'Library') }}</span>
+                            </div>
+                            <div class="mb-3">
+                                <strong>Contact Email:</strong>
+                                <span class="text-muted">{{ current_settings.get('librarian_email', 'library@example.com') }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Quick Actions</h5>
+                        </div>
+                        <div class="card-body">
+                            <a href="{{ url_for('core.dashboard') }}" class="btn btn-outline-primary w-100 mb-2">
+                                <i class="bi bi-speedometer2 me-2"></i>Back to Dashboard
+                            </a>
+                            <a href="{{ url_for('backup.backup_data') }}" class="btn btn-outline-secondary w-100">
+                                <i class="bi bi-archive me-2"></i>Backup Data
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}

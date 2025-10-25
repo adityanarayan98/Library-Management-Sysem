@@ -1,0 +1,68 @@
+{% extends "opac/patron_base.html" %}
+
+{% block title %}Patron Login - {{ library_name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow">
+                <div class="card-header text-center bg-primary text-white">
+                    <h4 class="mb-0"><i class="bi bi-person-circle me-2"></i>Patron Login</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+
+                        <div class="mb-3">
+                            <label for="roll_no" class="form-label">Roll Number</label>
+                            {{ form.roll_no(class="form-control", placeholder="Enter your roll number") }}
+                            {% if form.roll_no.errors %}
+                                {% for error in form.roll_no.errors %}
+                                    <div class="text-danger small">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            {{ form.password(class="form-control", placeholder="Enter your password") }}
+                            {% if form.password.errors %}
+                                {% for error in form.password.errors %}
+                                    <div class="text-danger small">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>Login
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="text-center mt-3">
+                        <small class="text-muted">
+                            Don't have an account?
+                            <a href style="color: #3498db;">Contact Librarian</a>
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- OPAC Access Info -->
+            <div class="card mt-3 shadow-sm">
+                <div class="card-body text-center">
+                    <h6 class="card-title text-muted">Public Access</h6>
+                    <p class="card-text small text-muted mb-2">
+                        Browse the library catalog without login
+                    </p>
+                    <a href="{{ url_for('opac.opac_home') }}" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-globe me-1"></i>{{ library_name }} Catalog
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

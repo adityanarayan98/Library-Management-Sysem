@@ -1,0 +1,259 @@
+    {% extends "opac/patron_base.html" %}
+
+{% block title %}{{ patron.name }} - Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Patron Header - Compact Version -->
+    <div class="row mb-3">
+        <div class="col-md-9">
+            <div class="card bg-light">
+                <div class="card-body py-3">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h2 class="card-title mb-1">
+                                <i class="bi bi-person-circle me-2"></i>{{ patron.name }}
+                            </h2>
+                            <p class="card-text text-muted mb-0 small">
+                                <strong>Roll No:</strong> {{ patron.roll_no }} |
+                                <strong>Email:</strong> {{ patron.email }} |
+                                <strong>Status:</strong>
+                                {% if patron.status == 'active' %}
+                                    <span class="badge bg-success">Active</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ patron.status.title() }}</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card stat-card text-center">
+                <div class="card-body">
+                    <i class="bi bi-book fs-1 mb-2"></i>
+                    <h3 class="card-title">{{ current_loans }}</h3>
+                    <p class="card-text">Books Borrowed</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card stat-card text-center">
+                <div class="card-body">
+                    <i class="bi bi-clock-history fs-1 mb-2"></i>
+                    <h3 class="card-title">{{ overdue_books }}</h3>
+                    <p class="card-text">Overdue Books</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card text-center">
+                <div class="card-body">
+                    <i class="bi bi-trophy fs-1 mb-2"></i>
+                    <h3 class="card-title">{{ total_borrowed }}</h3>
+                    <p class="card-text">Total Borrowed</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card stat-card text-center">
+                <div class="card-body">
+                    <i class="bi bi-cash-coin fs-1 mb-2 text-warning"></i>
+                    <h3 class="card-title">₹{{ "%.2f"|format(total_fines) }}</h3>
+                    <p class="card-text">Outstanding Fines</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Information -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="bi bi-info-circle me-2"></i>Contact Information</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-envelope text-info me-3"></i>
+                        <div>
+                            <div class="fw-bold">Contact Librarian</div>
+                            <small class="text-muted">{{ librarian_email }}</small>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-telephone text-success me-3"></i>
+                        <div>
+                            <div class="fw-bold">Support</div>
+                            <small class="text-muted">Available during library hours</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Outstanding Fines Section -->
+    {% if total_fines > 0 %}
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card border-warning">
+                <div class="card-header bg-warning bg-opacity-10">
+                    <h5 class="mb-0 text-warning"><i class="bi bi-exclamation-triangle me-2"></i>Outstanding Fines</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Important:</strong> You have outstanding fines totaling <strong>₹{{ "%.2f"|format(total_fines) }}</strong>.
+                        Please contact the librarian to clear these fines.
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Book Title</th>
+                                    <th>Accession No.</th>
+                                    <th>Days Overdue</th>
+                                    <th>Fine Amount</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for transaction in current_loans_list %}
+                                {% if transaction.fine_amount and transaction.fine_amount > 0 and not transaction.fine_paid %}
+                                <tr class="table-warning">
+                                    <td><strong>{{ transaction.book.title }}</strong></td>
+                                    <td>{{ transaction.book.accession_number }}</td>
+                                    <td>
+                                        {% if transaction.due_date %}
+                                            {% if transaction.due_date < datetime.now().date() %}
+                                                {{ (datetime.now().date() - transaction.due_date).days }} days
+                                            {% else %}
+                                                0
+                                            {% endif %}
+                                        {% else %}
+                                            0
+                                        {% endif %}
+                                    </td>
+                                    <td><strong class="text-danger">₹{{ "%.2f"|format(transaction.fine_amount or 0) }}</strong></td>
+                                    <td>
+                                        {% if transaction.fine_paid %}
+                                            <span class="badge bg-success">Paid</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Unpaid</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Current Loans -->
+    {% if current_loans > 0 %}
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-book me-2"></i>Current Loans</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Accession No.</th>
+                                    <th>Title</th>
+                                    <th>Author</th>
+                                    <th>Issue Date</th>
+                                    <th>Due Date</th>
+                                    <th>Fine</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for transaction in current_loans_list %}
+                                <tr>
+                                    <td><strong>{{ transaction.book.accession_number }}</strong></td>
+                                    <td>{{ transaction.book.title }}</td>
+                                    <td>{{ transaction.book.author }}</td>
+                                    <td>{{ transaction.issue_date.strftime('%d/%m/%Y') }}</td>
+                                    <td>
+                                        {{ transaction.due_date.strftime('%d/%m/%Y') }}
+                                        {% if transaction.due_date and transaction.due_date < datetime.now().date() %}
+                                            <span class="badge bg-danger ms-1">Overdue</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if transaction.fine_amount and transaction.fine_amount > 0 %}
+                                            <span class="badge bg-warning text-dark">₹{{ "%.2f"|format(transaction.fine_amount or 0) }}</span>
+                                        {% else %}
+                                            <span class="badge bg-success">No Fine</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if transaction.status == 'issued' %}
+                                            <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">{{ transaction.status.title() }}</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+
+
+    <!-- Quick Actions -->
+    <div class="row">
+        <div class="col">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-lightning me-2"></i>Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <a href="{{ url_for('opac.opac_home') }}" class="btn btn-primary w-100">
+                                <i class="bi bi-search me-2"></i>Search Books
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{{ url_for('opac.categories') }}" class="btn btn-outline-primary w-100">
+                                <i class="bi bi-grid-3x2 me-2"></i>Browse Categories
+                            </a>
+                        </div>
+
+                        <div class="col-md-3">
+                            <a href="{{ url_for('patron_auth.change_password') }}" class="btn btn-outline-secondary w-100">
+                                <i class="bi bi-key me-2"></i>Change Password
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

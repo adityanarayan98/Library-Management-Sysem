@@ -1,0 +1,352 @@
+{% extends "base.html" %}
+
+{% block title %}Issue Book - {{ library_name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card" style="margin-bottom: 2rem; min-height: 200px;">
+                <div class="card-header bg-success text-white">
+                    <h4><i class="bi bi-arrow-up-circle me-2"></i>Issue Book</h4>
+                </div>
+                <div class="card-body" style="padding-bottom: 3rem; min-height: 500px;">
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+
+                        <!-- Hidden fields to store actual form values -->
+                        <input type="hidden" name="patron_roll_no" id="patron_roll_no_hidden" value="{{ form.patron_roll_no.data or '' }}">
+                        <input type="hidden" name="accession_number" id="accession_number_hidden" value="{{ form.accession_number.data or '' }}">
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.patron_roll_no.label(class="form-label") }}
+                                    <div class="search-input-container">
+                                        <input type="text"
+                                               id="patronSearch"
+                                               class="form-select search-input {{ 'is-invalid' if form.patron_roll_no.errors else '' }}"
+                                               placeholder="e.g., CS001, John Doe, MECH025"
+                                               autocomplete="off"
+                                               value="{{ form.patron_roll_no.data or '' }}">
+                                        <div id="patronResults" class="search-results-dropdown">
+                                            <!-- Results will appear here -->
+                                        </div>
+                                    </div>
+                                    {% if form.patron_roll_no.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.patron_roll_no.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">
+                                        <small class="text-muted">
+                                            💡 <strong>Search Tips:</strong> Type roll number (CS001) or name (John Doe)<br>
+                                            🔍 <strong>Examples:</strong> CS001, MECH025, John Doe, Jane Smith<br>
+                                            ✅ Only active patrons are shown in results
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.accession_number.label(class="form-label") }}
+                                    <div class="search-input-container">
+                                        <input type="text"
+                                               id="bookSearch"
+                                               class="form-select search-input {{ 'is-invalid' if form.accession_number.errors else '' }}"
+                                               placeholder="e.g., CS001, Introduction to Algorithms, LIB025"
+                                               autocomplete="off"
+                                               value="{{ form.accession_number.data or '' }}">
+                                        <div id="bookResults" class="search-results-dropdown">
+                                            <!-- Results will appear here -->
+                                        </div>
+                                    </div>
+                                    {% if form.accession_number.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.accession_number.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">
+                                        <small class="text-muted">
+                                            💡 <strong>Search Tips:</strong> Type accession number (CS001) or book title<br>
+                                            🔍 <strong>Examples:</strong> CS001, Introduction to Algorithms, Database Systems<br>
+                                            ✅ Only available books are shown in results
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>Note:</strong> Only active patrons and available books are shown in the filtered results. The system automatically filters out inactive patrons and unavailable books.
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('core.dashboard') }}" class="btn btn-secondary me-2">
+                                <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+                            </a>
+                            {{ form.submit(class="btn btn-primary") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Recent Issues Section -->
+            {% if recent_issues %}
+            <div class="card mt-4">
+                <div class="card-header bg-info text-white">
+                    <h5><i class="bi bi-clock-history me-2"></i>Recent Book Issues</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="bg-info text-white">
+                                <tr>
+                                    <th>Transaction ID</th>
+                                    <th>Patron</th>
+                                    <th>Book</th>
+                                    <th>Issue Date</th>
+                                    <th>Due Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for issue in recent_issues %}
+                                <tr>
+                                    <td>{{ issue[0] }}</td>
+                                    <td>
+                                        <strong>{{ issue[2] }}</strong><br>
+                                        <small class="text-muted">{{ issue[1] }}</small>
+                                    </td>
+                                    <td>
+                                        <strong>{{ issue[4] }}</strong><br>
+                                        <small class="text-muted">{{ issue[3] }}</small>
+                                    </td>
+                                    <td>{{ issue[5] or 'N/A' }}</td>
+                                    <td>{{ issue[6] or 'N/A' }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Get data from the form choices or use sample data
+    const patrons = [
+        {% if form.patron_roll_no.choices %}
+        {% for value, label in form.patron_roll_no.choices %}
+        {% if value %}
+        { roll_no: '{{ value }}', name: '{{ label.split(' - ')[1] if ' - ' in label else label }}' },
+        {% endif %}
+        {% endfor %}
+        {% else %}
+        { roll_no: 'CS001', name: 'John Doe' },
+        { roll_no: 'CS002', name: 'Jane Smith' },
+        { roll_no: 'ME001', name: 'Bob Johnson' }
+        {% endif %}
+    ];
+
+    const books = [
+        {% if form.accession_number.choices %}
+        {% for value, label in form.accession_number.choices %}
+        {% if value %}
+        { accession_number: '{{ value }}', title: '{{ label.split(' - ')[1] if ' - ' in label else label }}' },
+        {% endif %}
+        {% endfor %}
+        {% else %}
+        { accession_number: 'LIB001', title: 'Introduction to Programming' },
+        { accession_number: 'LIB002', title: 'Data Structures' },
+        { accession_number: 'LIB003', title: 'Database Systems' }
+        {% endif %}
+    ];
+
+    let currentHighlightedIndex = -1;
+    let currentResultsContainer = null;
+
+    // Patron search functionality
+    document.getElementById('patronSearch').addEventListener('input', function() {
+        const query = this.value.toLowerCase();
+        const resultsContainer = document.getElementById('patronResults');
+
+        if (query.length === 0) {
+            resultsContainer.classList.remove('show');
+            currentHighlightedIndex = -1;
+            return;
+        }
+
+        const filteredPatrons = patrons.filter(patron =>
+            patron.roll_no.toLowerCase().includes(query) ||
+            patron.name.toLowerCase().includes(query)
+        );
+
+        displaySearchResults(filteredPatrons, resultsContainer, 'patron');
+    });
+
+    // Book search functionality
+    document.getElementById('bookSearch').addEventListener('input', function() {
+        const query = this.value.toLowerCase();
+        const resultsContainer = document.getElementById('bookResults');
+
+        if (query.length === 0) {
+            resultsContainer.classList.remove('show');
+            currentHighlightedIndex = -1;
+            return;
+        }
+
+        const filteredBooks = books.filter(book =>
+            book.accession_number.toLowerCase().includes(query) ||
+            book.title.toLowerCase().includes(query)
+        );
+
+        displaySearchResults(filteredBooks, resultsContainer, 'book');
+    });
+
+    function displaySearchResults(items, container, type) {
+        container.innerHTML = '';
+        currentHighlightedIndex = -1;
+        currentResultsContainer = container;
+
+        if (items.length === 0) {
+            container.innerHTML = '<div class="no-results">No results found</div>';
+        } else {
+            // Show ALL items - no limit
+            items.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'search-result-item';
+                div.dataset.index = index;
+                div.innerHTML = type === 'patron'
+                    ? `<strong>${item.roll_no}</strong> - ${item.name}`
+                    : `<strong>${item.accession_number}</strong> - ${item.title}`;
+
+                div.addEventListener('click', function() {
+                    selectSearchItem(item, type);
+                });
+
+                div.addEventListener('mouseenter', function() {
+                    highlightItem(this);
+                });
+
+                container.appendChild(div);
+            });
+        }
+
+        container.classList.add('show');
+    }
+
+    function selectSearchItem(item, type) {
+        const searchInput = document.getElementById(type === 'patron' ? 'patronSearch' : 'bookSearch');
+        const resultsContainer = document.getElementById(type === 'patron' ? 'patronResults' : 'bookResults');
+
+        // Set the display value
+        searchInput.value = type === 'patron'
+            ? `${item.roll_no} - ${item.name}`
+            : `${item.accession_number} - ${item.title}`;
+
+        // Hide the dropdown immediately
+        resultsContainer.classList.remove('show');
+         setTimeout(() => { resultsContainer.innerHTML = ''; }, 200);
+        // Reset state
+        currentHighlightedIndex = -1;
+        currentResultsContainer = null;
+
+        // Set the actual form value for submission
+        const hiddenInput = document.querySelector(`[name="${type === 'patron' ? 'patron_roll_no' : 'accession_number'}"]`);
+        if (hiddenInput) {
+            hiddenInput.value = type === 'patron' ? item.roll_no : item.accession_number;
+        }
+
+        // Remove focus from search input
+        searchInput.blur();
+    }
+
+    function highlightItem(element) {
+        // Remove previous highlighting
+        const container = element.closest('.search-results-dropdown');
+        const items = container.querySelectorAll('.search-result-item');
+        items.forEach(item => item.classList.remove('highlighted'));
+
+        // Add highlighting to current item
+        element.classList.add('highlighted');
+        currentHighlightedIndex = parseInt(element.dataset.index);
+    }
+
+    // Keyboard navigation
+    document.addEventListener('keydown', function(e) {
+        const activeContainer = document.querySelector('.search-results-dropdown.show');
+        if (!activeContainer) return;
+
+        const items = activeContainer.querySelectorAll('.search-result-item');
+        if (items.length === 0) return;
+
+        switch(e.key) {
+            case 'ArrowDown':
+                e.preventDefault();
+                currentHighlightedIndex = (currentHighlightedIndex + 1) % items.length;
+                updateHighlight(items);
+                break;
+            case 'ArrowUp':
+                e.preventDefault();
+                currentHighlightedIndex = currentHighlightedIndex <= 0 ? items.length - 1 : currentHighlightedIndex - 1;
+                updateHighlight(items);
+                break;
+            case 'Enter':
+                e.preventDefault();
+                if (currentHighlightedIndex >= 0 && items[currentHighlightedIndex]) {
+                    items[currentHighlightedIndex].click();
+                }
+                break;
+            case 'Escape':
+                e.preventDefault();
+                activeContainer.classList.remove('show');
+                currentHighlightedIndex = -1;
+                break;
+        }
+    });
+
+    function updateHighlight(items) {
+        items.forEach((item, index) => {
+            if (index === currentHighlightedIndex) {
+                item.classList.add('highlighted');
+                item.scrollIntoView({ block: 'nearest' });
+            } else {
+                item.classList.remove('highlighted');
+            }
+        });
+    }
+
+    // Hide results when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.search-input-container')) {
+            document.getElementById('patronResults').classList.remove('show');
+            document.getElementById('bookResults').classList.remove('show');
+            currentHighlightedIndex = -1;
+        }
+    });
+
+    // Show results when focusing on input
+    document.getElementById('patronSearch').addEventListener('focus', function() {
+        if (this.value.length > 0) {
+            this.dispatchEvent(new Event('input'));
+        }
+    });
+
+    document.getElementById('bookSearch').addEventListener('focus', function() {
+        if (this.value.length > 0) {
+            this.dispatchEvent(new Event('input'));
+        }
+    });
+
+</script>
+{% endblock %}

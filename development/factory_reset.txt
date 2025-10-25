@@ -1,0 +1,246 @@
+# FACTORY RESET GUIDE - Library Management System
+# ===============================================
+#
+# This guide explains how to perform a complete factory reset
+# of your Library Management System, removing all data and
+# restoring the application to its initial state.
+
+# ==============================================================================
+# WHAT IS A FACTORY RESET?
+# ==============================================================================
+# A factory reset will:
+# - Delete ALL existing data (users, books, patrons, transactions, settings)
+# - Recreate all database tables with default structure
+# - Restore default library settings
+# - Create a fresh admin user account
+# - Give you a completely clean slate to start over
+
+# ==============================================================================
+# ⚠️ IMPORTANT WARNINGS ⚠️
+# ==============================================================================
+# - BACKUP YOUR DATA FIRST! If you have important information you want to keep,
+#   make a copy of the database file before proceeding.
+# - This action CANNOT be undone once the database file is deleted.
+# - All users, books, patrons, and transaction history will be permanently lost.
+
+# ==============================================================================
+# METHOD 1: MANUAL DATABASE FILE DELETION (Recommended)
+# ==============================================================================
+
+## Step 1: Stop the Application
+# - Close any running instances of the Library Management System
+# - Make sure no Python processes are using the database file
+# - Press Ctrl+C if the server is running in your terminal
+
+## Step 2: Locate the Database File
+# The database file is located at:
+# development/library_management/app/instance/library.db
+
+## Step 3: Create a Backup (Optional but Recommended)
+# If you want to keep your current data for reference:
+# - Copy the file: library.db to library_backup.db
+# - Or copy the entire 'instance' folder to 'instance_backup'
+
+## Step 4: Delete the Database File
+# - Navigate to: development/library_management/app/instance/
+# - Delete the file named: library.db
+# - Confirm deletion when prompted
+
+## Step 5: Restart the Application
+# - Run: python development/library_management/run.py
+# - The application will automatically:
+#   * Recreate the database file
+#   * Set up all required tables
+#   * Initialize default settings
+#   * Create a new admin user
+
+## Step 6: Verify Reset
+# - Open your browser and go to: http://127.0.0.1:5000
+# - Log in with the default credentials:
+#   Username: admin
+#   Password: admin123
+
+# ==============================================================================
+# METHOD 2: USING COMMAND LINE (Advanced Users)
+# ==============================================================================
+
+## Quick Reset Command:
+# Remove-Item -Path "development/library_management/app/instance/library.db" -Force
+# python development/library_management/run.py
+
+## Reset with Backup:
+# Copy-Item "development/library_management/app/instance/library.db" "development/library_management/app/instance/library_backup_$(Get-Date -Format 'yyyy-MM-dd_HH-mm-ss').db"
+# Remove-Item -Path "development/library_management/app/instance/library.db" -Force
+# python development/library_management/run.py
+
+## Reset with Complete System Backup (Recommended):
+# 1. Create complete backup first:
+#    python development/library_management/run.py
+#    # Go to http://127.0.0.1:5000/backup and create "CSV Format" backup
+# 2. This creates 4 coordinated files + manifest for complete restoration
+# 3. Delete database: Remove-Item -Path "development/library_management/app/instance/library.db" -Force
+# 4. Restart: python development/library_management/run.py
+# 5. Use Complete Restore to restore from the 4 backup files
+
+# ==============================================================================
+# METHOD 3: COMPLETE SYSTEM RESET (Nuclear Option)
+# ==============================================================================
+# If you want to reset EVERYTHING including cache files:
+
+## Step 1: Stop Application
+# - Close all running instances
+
+## Step 2: Clear All Cache Files
+# - Delete __pycache__ directories:
+#   * development/library_management/__pycache__/
+#   * development/library_management/app/__pycache__/
+# - Remove any .pyc files in the project
+
+## Step 3: Delete Database
+# - Delete: development/library_management/app/instance/library.db
+
+## Step 4: Clean Installation
+# - Run: python development/library_management/run.py
+# - This gives you the absolute cleanest possible reset
+
+# ==============================================================================
+# AFTER FACTORY RESET - DEFAULT SETTINGS
+# ==============================================================================
+
+## Default User Accounts:
+# - Username: admin
+# - Password: admin123
+# - Role: Administrator (full access)
+
+## Default Library Settings:
+# - Fine per day: $1.00
+# - Student due days: 14 days
+# - Faculty due days: 30 days
+# - Staff due days: 21 days
+# - Student max books: 3
+# - Faculty max books: 5
+# - Staff max books: 4
+# - Library name: "Library"
+# - Librarian email: library@example.com
+
+## Default Categories Available:
+# - All categories are available for book classification
+# - You can add custom categories as needed
+
+# ==============================================================================
+# TROUBLESHOOTING AFTER RESET
+# ==============================================================================
+
+## Problem: Application won't start
+# Solution: Check that all Python packages are installed
+# Run: pip install -r development/library_management/requirements.txt
+
+## Problem: Still seeing old data
+# Solution: Make sure you deleted the correct database file
+# Verify: development/library_management/app/instance/library.db is gone
+
+## Problem: Login not working
+# Solution: Use the default credentials: admin / admin123
+# If that doesn't work, the reset may not have completed properly
+
+## Problem: Port already in use
+# Solution: Make sure no other instance is running
+# Check Task Manager for Python processes and end them
+
+# ==============================================================================
+# ALTERNATIVE: PARTIAL RESET OPTIONS
+# ==============================================================================
+
+## Reset Only Users:
+# - Delete specific user records from the database
+# - Keep books, patrons, and transaction history
+
+## Reset Only Books:
+# - Delete book and transaction records
+# - Keep user accounts and patron information
+
+## Reset Only Settings:
+# - Modify library_settings table values
+# - Keep all user data and records
+
+## Reset Specific Patron:
+# - Delete patron and their transaction history
+# - Keep other data intact
+
+# ==============================================================================
+# BACKUP BEFORE RESET (Highly Recommended)
+# ==============================================================================
+
+## Why Backup?
+# - Recover accidentally deleted important data
+# - Reference historical information later
+# - Restore specific records if needed
+
+## What to Backup:
+# - Database file: library.db
+# - Instance folder: /instance/ (contains the database)
+# - Any exported reports or data files
+
+## Backup Methods:
+# 1. Copy database file to a safe location
+# 2. Use the application's backup feature (if available)
+# 3. Export data to CSV/Excel format
+
+# ==============================================================================
+# QUICK REFERENCE
+# ==============================================================================
+
+## Factory Reset Checklist:
+# ☐ [ ] Stop the application
+# ☐ [ ] Backup important data (optional)
+# ☐ [ ] Delete database file
+# ☐ [ ] Clear cache files (optional)
+# ☐ [ ] Restart application
+# ☐ [ ] Verify reset worked
+# ☐ [ ] Test login with admin/admin123
+
+## Default Login After Reset:
+# Username: admin
+# Password: admin123
+
+## Database Location:
+# development/library_management/app/instance/library.db
+
+# ==============================================================================
+# NEW: ENHANCED BACKUP/RESTORE SYSTEM
+# ==============================================================================
+
+## Complete System Backup (New Feature):
+# The system now creates 4 coordinated backup files + manifest:
+# - system_backup_categories_YYYYMMDD_HHMMSS.csv (Categories - import FIRST)
+# - system_backup_patrons_YYYYMMDD_HHMMSS.csv (Patrons - import SECOND)
+# - system_backup_books_YYYYMMDD_HHMMSS.csv (Books - import THIRD)
+# - system_backup_transactions_YYYYMMDD_HHMMSS.csv (Transactions - import FOURTH)
+# - system_backup_manifest_YYYYMMDD_HHMMSS.json (Metadata & instructions)
+
+## Complete System Restore (New Feature):
+# - Upload manifest file to validate backup integrity
+# - System automatically imports files in correct dependency order
+# - Complete restoration with single click
+# - Access via: http://127.0.0.1:5000/complete_restore
+
+## Benefits of New System:
+# ✅ Coordinated 4-file backup for complete restoration
+# ✅ Dependency management (categories before books, etc.)
+# ✅ Backup manifest with metadata and instructions
+# ✅ One-click complete system restoration
+# ✅ Maintains data integrity across all tables
+
+# ==============================================================================
+# SUPPORT
+# ==============================================================================
+# If you encounter issues during the reset process:
+# 1. Check this guide for troubleshooting steps
+# 2. Verify all steps were completed in order
+# 3. Make sure no other instances are running
+# 4. Check file permissions in the instance directory
+# 5. Clear Python cache files if experiencing issues
+# 6. Use the new Complete Restore feature for coordinated restoration
+
+# Last Updated: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')
+# Library Management System - Factory Reset Guide

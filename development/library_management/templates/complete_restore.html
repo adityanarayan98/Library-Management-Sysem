@@ -1,0 +1,324 @@
+{% extends "base.html" %}
+
+{% block title %}Complete System Restore - Library Management System{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="row align-items-center">
+            <div class="col">
+                <h1 class="mb-0"><i class="bi bi-arrow-clockwise me-2"></i>Complete System Restore</h1>
+                <p class="text-muted mb-0">Restore your entire library system from backup files</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Restore Section -->
+        <div class="col-12 mb-4">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-cloud-upload me-2"></i>Complete System Restoration</h5>
+                </div>
+                <div class="card-body">
+
+                    {% if not manifest_data %}
+                        <!-- Step 1: Upload Manifest File -->
+                        <div class="row">
+                            <div class="col-lg-8">
+                                <h6><i class="bi bi-1-circle me-2"></i>Step 1: Upload Backup Manifest</h6>
+                                <p class="text-muted">Upload the backup manifest file (system_backup_manifest_*.json) to begin the restoration process.</p>
+
+                                <form method="POST" enctype="multipart/form-data">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                    <input type="hidden" name="action" value="validate_manifest"/>
+
+                                    <div class="mb-3">
+                                        <label for="manifest_file" class="form-label">Backup Manifest File</label>
+                                        <input type="file" class="form-control" id="manifest_file" name="manifest_file"
+                                               accept=".json" required>
+                                        <div class="form-text">
+                                            Upload the system_backup_manifest_*.json file created during backup
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="bi bi-check-circle me-2"></i>Validate Manifest & Show Files
+                                    </button>
+                                </form>
+                            </div>
+
+                            <div class="col-lg-4">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h6><i class="bi bi-info-circle me-2"></i>What is a Manifest?</h6>
+                                        <p class="small mb-0">
+                                            The manifest file contains metadata about your backup, including:
+                                            file names, record counts, import order, and restoration instructions.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    {% else %}
+                        <!-- Step 2: Show Backup Information and Restore -->
+                        <div class="row">
+                            <div class="col-lg-8">
+                                <h6><i class="bi bi-2-circle me-2"></i>Step 2: Review Backup & Restore</h6>
+
+                                <!-- Backup Summary -->
+                                <div class="card bg-light mb-4">
+                                    <div class="card-header">
+                                        <h6 class="mb-0"><i class="bi bi-clipboard-data me-2"></i>Backup Summary</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row text-center">
+                                            <div class="col-md-3">
+                                                <h4 class="text-primary">{{ manifest_data.backup_summary.total_categories }}</h4>
+                                                <small class="text-muted">Categories</small>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <h4 class="text-success">{{ manifest_data.backup_summary.total_patrons }}</h4>
+                                                <small class="text-muted">Patrons</small>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <h4 class="text-info">{{ manifest_data.backup_summary.total_books }}</h4>
+                                                <small class="text-muted">Books</small>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <h4 class="text-warning">{{ manifest_data.backup_summary.total_transactions }}</h4>
+                                                <small class="text-muted">Transactions</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Restoration Plan -->
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h6 class="mb-0"><i class="bi bi-arrow-down-up me-2"></i>Restoration Plan</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <h6><i class="bi bi-list-ol me-2"></i>Import Order:</h6>
+                                            <ol class="mb-0">
+                                                {% for file in manifest_data.files %}
+                                                    <li>
+                                                        <strong>{{ file.type.title() }}</strong> - {{ file.description }}
+                                                        <small class="text-muted">({{ file.record_count }} records)</small>
+                                                    </li>
+                                                {% endfor %}
+                                            </ol>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <h6><i class="bi bi-lightbulb me-2"></i>Instructions:</h6>
+                                            <ul class="mb-0">
+                                                {% for instruction in manifest_data.instructions %}
+                                                    <li>{{ instruction }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Validation Errors -->
+                                {% if validation_errors %}
+                                    <div class="alert alert-danger">
+                                        <h6><i class="bi bi-exclamation-triangle me-2"></i>Validation Errors:</h6>
+                                        <ul class="mb-0">
+                                            {% for error in validation_errors %}
+                                                <li>{{ error }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                {% endif %}
+
+                                <!-- Restore Button -->
+                                <form method="POST">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                    <input type="hidden" name="action" value="restore"/>
+
+                                    <div class="alert alert-warning">
+                                        <h6><i class="bi bi-exclamation-triangle me-2"></i>⚠️ Important Warning</h6>
+                                        <p class="mb-2">
+                                            This will replace ALL current data in your library system with the backup data.
+                                            This action cannot be undone.
+                                        </p>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="confirm_restore" required>
+                                            <label class="form-check-label" for="confirm_restore">
+                                                I understand this will replace all current data and want to proceed
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-danger btn-lg"
+                                            onclick="return confirm('Are you absolutely sure? This will replace ALL current data with backup data.')">
+                                        <i class="bi bi-arrow-clockwise me-2"></i>Perform Complete System Restore
+                                    </button>
+
+                                    <a href="{{ url_for('backup.complete_restore') }}" class="btn btn-secondary ms-2">
+                                        <i class="bi bi-arrow-left me-2"></i>Start Over
+                                    </a>
+                                </form>
+                            </div>
+
+                            <div class="col-lg-4">
+                                <!-- File Status -->
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6 class="mb-0"><i class="bi bi-files me-2"></i>Backup Files Status</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        {% for file in manifest_data.files %}
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <div>
+                                                    <small class="fw-bold">{{ file.type.title() }}</small><br>
+                                                    <small class="text-muted">{{ file.filename }}</small>
+                                                </div>
+                                                <span class="badge bg-{{ 'success' if file.record_count > 0 else 'warning' }}">
+                                                    {{ file.record_count }} records
+                                                </span>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+
+                                <!-- Help Text -->
+                                <div class="card bg-light mt-3">
+                                    <div class="card-body">
+                                        <h6><i class="bi bi-question-circle me-2"></i>Need Help?</h6>
+                                        <p class="small mb-2">
+                                            Make sure all 4 backup files are in the <code>backups/</code> folder:
+                                        </p>
+                                        <ul class="small mb-0">
+                                            <li>system_backup_categories_*.csv</li>
+                                            <li>system_backup_patrons_*.csv</li>
+                                            <li>system_backup_books_*.csv</li>
+                                            <li>system_backup_transactions_*.csv</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    {% if restore_results %}
+        <div class="row">
+            <div class="col-12">
+                <div class="card {% if restore_results.success %}border-success{% else %}border-danger{% endif %}">
+                    <div class="card-header {% if restore_results.success %}bg-success{% else %}bg-danger{% endif %} text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-{{ 'check-circle' if restore_results.success else 'x-circle' }} me-2"></i>
+                            {{ 'Restoration Successful!' if restore_results.success else 'Restoration Failed' }}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if restore_results.success %}
+                            <div class="row text-center">
+                                <div class="col-md-3">
+                                    <h4 class="text-success">{{ restore_results.categories }}</h4>
+                                    <small class="text-muted">Categories Restored</small>
+                                </div>
+                                <div class="col-md-3">
+                                    <h4 class="text-success">{{ restore_results.patrons }}</h4>
+                                    <small class="text-muted">Patrons Restored</small>
+                                </div>
+                                <div class="col-md-3">
+                                    <h4 class="text-success">{{ restore_results.books }}</h4>
+                                    <small class="text-muted">Books Restored</small>
+                                </div>
+                                <div class="col-md-3">
+                                    <h4 class="text-success">{{ restore_results.transactions }}</h4>
+                                    <small class="text-muted">Transactions Restored</small>
+                                </div>
+                            </div>
+                            <div class="alert alert-success mt-3">
+                                <i class="bi bi-check-circle me-2"></i>
+                                <strong>Complete system restoration successful!</strong>
+                                Your library system has been fully restored with {{ restore_results.total_restored }} total records.
+                                You can now resume normal library operations.
+                            </div>
+                        {% else %}
+                            <div class="alert alert-danger">
+                                <i class="bi bi-x-circle me-2"></i>
+                                <strong>Restoration failed:</strong> {{ restore_results.error }}
+                            </div>
+                        {% endif %}
+
+                        <div class="text-center mt-3">
+                            <a href="{{ url_for('core.dashboard') }}" class="btn btn-primary">
+                                <i class="bi bi-house me-2"></i>Go to Dashboard
+                            </a>
+                            <a href="{{ url_for('backup.complete_restore') }}" class="btn btn-secondary ms-2">
+                                <i class="bi bi-arrow-clockwise me-2"></i>Try Again
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Information Section -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>About Complete System Restore</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-check-circle me-2"></i>What Gets Restored:</h6>
+                            <ul>
+                                <li>All book categories and classifications</li>
+                                <li>All patron records and information</li>
+                                <li>Complete book collection with details</li>
+                                <li>All transaction history and records</li>
+                                <li>Library settings and configuration</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-arrow-repeat me-2"></i>Restoration Process:</h6>
+                            <ol>
+                                <li><strong>Categories First:</strong> Creates foundation for books</li>
+                                <li><strong>Patrons Second:</strong> User accounts and permissions</li>
+                                <li><strong>Books Third:</strong> Library collection (needs categories)</li>
+                                <li><strong>Transactions Last:</strong> History (needs patrons and books)</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info mt-3">
+                        <h6><i class="bi bi-lightbulb me-2"></i>Pro Tips:</h6>
+                        <ul class="mb-0">
+                            <li><strong>Backup First:</strong> Always create a backup before restoring</li>
+                            <li><strong>Check Dependencies:</strong> Files are imported in dependency order</li>
+                            <li><strong>Verify After:</strong> Check your data after restoration completes</li>
+                            <li><strong>Service Ready:</strong> System is immediately ready for use after restore</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-refresh after successful restore
+{% if restore_results and restore_results.success %}
+setTimeout(function() {
+    window.location.href = '{{ url_for("core.dashboard") }}';
+}, 5000); // Redirect to dashboard after 5 seconds
+{% endif %}
+</script>
+{% endblock %}

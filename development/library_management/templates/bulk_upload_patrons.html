@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}Bulk Upload Patrons - Library Management System{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="row align-items-center">
+            <div class="col">
+                <h1 class="mb-0"><i class="bi bi-people-fill me-2"></i>Bulk Upload Patrons</h1>
+                <p class="text-muted mb-0">Upload multiple patrons from a CSV file</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-cloud-upload me-2"></i>Upload CSV File</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <div class="mb-3">
+                            <label for="file" class="form-label">Select CSV File</label>
+                            <input type="file" class="form-control" id="file" name="file" accept=".csv" required>
+                            <div class="form-text">
+                                Upload a CSV file containing patron data. Maximum file size: 10MB
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <h6>Required CSV Format:</h6>
+                            <p class="text-muted small">Your CSV file must contain the following columns in this exact order:</p>
+                            <div class="bg-light p-3 rounded">
+                                <code>roll_no, name</code> <span class="text-danger">*</span> (Required)<br>
+                                <code>email, phone, patron_type, department, division, status, max_books</code> (Optional)
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <h6>Sample CSV Format:</h6>
+                            <div class="bg-light p-3 rounded">
+                                <pre class="mb-0 small"><code>roll_no,name,email,phone,patron_type,department,division,status,max_books
+CS001,John Doe,john@example.com,1234567890,student,Computer Science,A,active,3
+ME002,Jane Smith,jane@example.com,0987654321,faculty,Mechanical,B,active,5</code></pre>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <h6>Field Descriptions:</h6>
+                            <ul class="list-unstyled">
+                                <li><strong>roll_no</strong>: Unique identifier for the patron <span class="text-danger">*</span></li>
+                                <li><strong>name</strong>: Full name of the patron <span class="text-danger">*</span></li>
+                                <li><strong>email</strong>: Email address (optional)</li>
+                                <li><strong>phone</strong>: Phone number (optional)</li>
+                                <li><strong>patron_type</strong>: student, faculty, or staff (default: student)</li>
+                                <li><strong>department</strong>: Department name (optional)</li>
+                                <li><strong>division</strong>: Division/Section (optional)</li>
+                                <li><strong>status</strong>: active or inactive (default: active)</li>
+                                <li><strong>max_books</strong>: Maximum books allowed (default: 3)</li>
+                            </ul>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-cloud-upload me-2"></i>Upload and Process
+                        </button>
+                        <a href="{{ url_for('patrons.patrons') }}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left me-2"></i>Back to Patrons
+                        </a>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Instructions</h5>
+                </div>
+                <div class="card-body">
+                    <ol class="mb-0">
+                        <li>Prepare your CSV file with the correct format</li>
+                        <li>Ensure roll numbers are unique</li>
+                        <li>Check that required fields (roll_no, name) are filled</li>
+                        <li>Upload the file using the form</li>
+                        <li>Review the results and fix any errors</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header bg-warning">
+                    <h5 class="mb-0"><i class="bi bi-exclamation-triangle me-2"></i>Important Notes</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li><i class="bi bi-check-circle text-success me-2"></i>Existing patrons will be updated</li>
+                        <li><i class="bi bi-check-circle text-success me-2"></i>New patrons will be added</li>
+                        <li><i class="bi bi-check-circle text-success me-2"></i>Empty rows will be skipped</li>
+                        <li><i class="bi bi-exclamation-triangle text-warning me-2"></i>Large files may take time to process</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

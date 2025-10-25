@@ -1,0 +1,334 @@
+{% extends "base.html" %}
+
+{% block title %}Backup & Import - {{ library_name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="row align-items-center">
+            <div class="col">
+                <h1 class="mb-0"><i class="bi bi-cloud-arrow-down me-2"></i>Backup & Import</h1>
+                <p class="text-muted mb-0">Manage data backup and restoration</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Backup Section -->
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-cloud-download me-2"></i>Data Backup</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Create backups of your library data in CSV or JSON format.</p>
+
+                    <form method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <div class="mb-3">
+                            <label for="backup_type" class="form-label">Backup Format</label>
+                            <select class="form-select" id="backup_type" name="backup_type">
+                                <option value="csv">CSV Format (Recommended for data migration)</option>
+                                <option value="json">JSON Format (Complete data structure)</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <h6>What gets backed up:</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-check-circle text-success me-2"></i>All patrons data</li>
+                                <li><i class="bi bi-check-circle text-success me-2"></i>All books collection</li>
+                                <li><i class="bi bi-check-circle text-success me-2"></i>All transactions history</li>
+                                <li><i class="bi bi-check-circle text-success me-2"></i>Categories and settings</li>
+                            </ul>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-cloud-download me-2"></i>Create Backup
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Import Section -->
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-cloud-upload me-2"></i>Data Import</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Import data from CSV files exported from other systems.</p>
+
+                    <form method="POST" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="file" class="form-label">Select CSV File</label>
+                            <input type="file" class="form-control" id="file" name="file" accept=".csv" required>
+                            <div class="form-text">Upload a CSV file containing patrons or books data</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <h6>Supported formats:</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-check-circle text-success me-2"></i>Patrons CSV: roll_no, name, email, phone</li>
+                                <li><i class="bi bi-check-circle text-success me-2"></i>Books CSV: title, author, isbn, publisher, accession_number</li>
+                            </ul>
+                        </div>
+
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-cloud-upload me-2"></i>Import Data
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Backup Files -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-folder me-2"></i>Recent Backup Files</h5>
+                    <div class="btn-group" role="group">
+                        <a href="{{ url_for('backup.export_table', table_name='books') }}" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-download me-1"></i>Download Current Data
+                        </a>
+                        <a href="{{ url_for('backup.enhanced_import') }}" class="btn btn-sm btn-outline-success">
+                            <i class="bi bi-cloud-upload me-1"></i>Enhanced Import
+                        </a>
+                        <a href="{{ url_for('backup.complete_restore') }}" class="btn btn-sm btn-outline-warning">
+                            <i class="bi bi-arrow-clockwise me-1"></i>Complete Restore
+                        </a>
+                        <a href="{{ url_for('transactions.transaction_logs') }}" class="btn btn-sm btn-outline-warning">
+                            <i class="bi bi-receipt me-1"></i>Transaction Logs
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+
+                    {% if backup_files %}
+                        <!-- Summary Stats -->
+                        <div class="row mb-4">
+                            <div class="col-md-3">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h4 class="text-primary mb-1">{{ backup_files|length }}</h4>
+                                        <small class="text-muted">Total Files</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h4 class="text-success mb-1">{{ total_size | round | int }} B</h4>
+                                        <small class="text-muted">Total Size</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h4 class="text-info mb-1">
+                                            {% set latest_file = backup_files | sort(attribute='modified') | last %}
+                                            {{ latest_file.modified_date if latest_file else 'N/A' }}
+                                        </h4>
+                                        <small class="text-muted">Last Backup</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h4 class="text-warning mb-1">
+                                            {{ csv_count }}
+                                        </h4>
+                                        <small class="text-muted">CSV Files</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Files Table -->
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>File Name</th>
+                                        <th>Type</th>
+                                        <th>Size</th>
+                                        <th>Created</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for file in backup_files | sort(attribute='modified', reverse=true) %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-file-earmark-{{ 'spreadsheet' if file.name.endswith('.csv') else 'text' }} me-2"></i>
+                                                <div>
+                                                    <div class="fw-bold">{{ file.name }}</div>
+                                                    <small class="text-muted">{{ file.path }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-secondary">{{ file.type.title() }}</span>
+                                        </td>
+                                        <td>
+                                            {% if file.size < 1024 %}
+                                                {{ file.size }} B
+                                            {% elif file.size < 1024 * 1024 %}
+                                                {{ (file.size / 1024) | round(1) }} KB
+                                            {% else %}
+                                                {{ (file.size / (1024 * 1024)) | round(1) }} MB
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <small>{{ file.modified_formatted }}</small>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm" role="group">
+                                                <a href="{{ url_for('static', filename=file.path) }}" class="btn btn-outline-primary" download>
+                                                    <i class="bi bi-download me-1"></i>Download
+                                                </a>
+                                                <button class="btn btn-outline-info" onclick="previewFile('{{ file.path }}', '{{ file.name }}')">
+                                                    <i class="bi bi-eye me-1"></i>Preview
+                                                </button>
+                                                <button class="btn btn-outline-danger btn-sm" onclick="deleteFile('{{ file.path }}', '{{ file.name }}')">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Bulk Actions -->
+                        <div class="mt-3 pt-3 border-top">
+                            <div class="row align-items-center">
+                                <div class="col-md-6">
+                                    <div class="btn-group" role="group">
+                                        <button class="btn btn-outline-secondary btn-sm" onclick="selectAllFiles()">
+                                            <i class="bi bi-check-all me-1"></i>Select All
+                                        </button>
+                                        <button class="btn btn-outline-secondary btn-sm" onclick="clearSelection()">
+                                            <i class="bi bi-x me-1"></i>Clear
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 text-end">
+                                    <button class="btn btn-primary btn-sm" onclick="downloadSelected()">
+                                        <i class="bi bi-download me-1"></i>Download Selected
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                    {% else %}
+                        <div class="text-center text-muted py-5">
+                            <i class="bi bi-folder-x fs-1 mb-3"></i>
+                            <p class="mb-2">No backup files found</p>
+                            <p class="small text-muted mb-3">Create your first backup using the form above</p>
+                            <a href="#backup-section" class="btn btn-primary">
+                                <i class="bi bi-cloud-download me-2"></i>Create First Backup
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Migration Guide -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Migration Guide</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-arrow-right-circle me-2"></i>From Google Sheets:</h6>
+                            <ol class="list-unstyled">
+                                <li><i class="bi bi-check-circle text-success me-2"></i>Export your Google Sheets data as CSV</li>
+                                <li><i class="bi bi-check-circle text-success me-2"></i>Upload the CSV file using the Import section</li>
+                                <li><i class="bi bi-check-circle text-success me-2"></i>Verify data integrity in the Books/Patrons sections</li>
+                            </ol>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-arrow-left-circle me-2"></i>To Google Sheets:</h6>
+                            <ol class="list-unstyled">
+                                <li><i class="bi bi-check-circle text-success me-2"></i>Create a backup using CSV format</li>
+                                <li><i class="bi bi-check-circle text-success me-2"></i>Download the generated CSV files</li>
+                                <li><i class="bi bi-check-circle text-success me-2"></i>Import CSV files into Google Sheets</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function previewFile(filePath, fileName) {
+    // Open file in new tab for preview
+    window.open("{{ url_for('static', filename='') }}" + filePath, '_blank');
+}
+
+function deleteFile(filePath, fileName) {
+    if (confirm('Are you sure you want to delete "' + fileName + '"?\n\nThis action cannot be undone.')) {
+        // Send AJAX request to delete file
+        fetch("{{ url_for('backup.delete_backup') }}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'file_path=' + encodeURIComponent(filePath) + '&csrf_token=' + encodeURIComponent("{{ csrf_token() }}")
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Reload page to show updated file list
+                location.reload();
+            } else {
+                alert('Error deleting file: ' + (data.error || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            alert('Error deleting file: ' + error.message);
+        });
+    }
+}
+
+function selectAllFiles() {
+    // Select all checkboxes (if we add them later)
+    console.log('Select all files');
+}
+
+function clearSelection() {
+    // Clear all selections (if we add checkboxes later)
+    console.log('Clear selection');
+}
+
+function downloadSelected() {
+    // Download selected files (if we add checkboxes later)
+    alert('Bulk download functionality will be implemented');
+}
+
+// Auto-refresh backup files list every 30 seconds
+setInterval(function() {
+    // Check if we're on the backup page and refresh if needed
+    if (window.location.pathname.includes('/backup')) {
+        // Optional: Auto-refresh the file list
+        // location.reload();
+    }
+}, 30000);
+</script>
+{% endblock %}

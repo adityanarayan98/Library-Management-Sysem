@@ -1,0 +1,484 @@
+{% extends "base.html" %}
+
+{% block title %}Books - {{ library_name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="row align-items-center">
+            <div class="col">
+                <h1 class="mb-0"><i class="bi bi-book me-2"></i>Books</h1>
+                <p class="text-muted mb-0">Manage library book collection</p>
+            </div>
+            <div class="col-auto">
+                <div class="btn-group" role="group">
+                    <a href="{{ url_for('books.add_book') }}" class="btn btn-primary">
+                        <i class="bi bi-book-plus me-2"></i>Add New Book
+                    </a>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-success dropdown-toggle" data-bs-toggle="dropdown">
+                            <i class="bi bi-download me-1"></i>Export
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('backup.export_table', table_name='books') }}">
+                                <i class="bi bi-file-earmark-spreadsheet me-2"></i>Export to CSV
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('books.bulk_upload_books') }}">
+                                <i class="bi bi-cloud-upload me-2"></i>Bulk Upload Books
+                            </a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filter Section -->
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-8">
+                    <div class="search-box">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-search"></i></span>
+                            <input type="text" class="form-control" id="bookSearch" placeholder="Search books by title, author, accession number, call number, or ISBN..." value="{{ search }}">
+                            <button class="btn btn-outline-secondary" type="button" id="clearSearch">
+                                <i class="bi bi-x"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-primary" onclick="searchBooks()">
+                            <i class="bi bi-search me-1"></i>Search
+                        </button>
+                        <button class="btn btn-outline-secondary" onclick="refreshPage()">
+                            <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Books Table -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-table me-2"></i>Books Collection</h5>
+            <div class="d-flex gap-2 align-items-center">
+                <small class="text-muted">Total: <span id="bookCount">{{ books|length }}</span> books</small>
+            </div>
+        </div>
+        <div class="card-body">
+            {% if books %}
+                <!-- Desktop Table View -->
+                <div class="table-responsive d-none d-md-block">
+                    <table class="table table-hover" id="booksTable">
+                        <thead>
+                            <tr>
+                                <th>Book No.</th>
+                                <th>Accession No</th>
+                                <th>Call No.</th>
+                                <th>Title</th>
+                                <th>Author</th>
+                                <th>Status</th>
+                                <th>Publication Year</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for book in books %}
+                            <tr>
+                                <td>
+                                    <span class="fw-bold">{{ book.id }}</span>
+                                </td>
+                                <td>
+                                    <span class="fw-bold">{{ book.accession_number }}</span>
+                                </td>
+                                <td>
+                                    {{ book.call_number or '-' }}
+                                </td>
+                                <td>
+                                    <div>
+                                        <div class="fw-bold">{{ book.title }}</div>
+                                        {% if book.isbn %}
+                                            <small class="text-muted">ISBN: {{ book.isbn }}</small>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td>{{ book.author }}</td>
+                                <td>
+                                    {% if book.status == 'available' %}
+                                        <span class="badge bg-success">{{ book.status.title() }}</span>
+                                    {% elif book.status == 'issued' %}
+                                        <span class="badge bg-warning">{{ book.status.title() }}</span>
+                                    {% elif book.status == 'lost' %}
+                                        <span class="badge bg-danger">{{ book.status.title() }}</span>
+                                    {% elif book.status == 'damaged' %}
+                                        <span class="badge bg-danger">{{ book.status.title() }}</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ book.status.title() }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ book.publication_year or '-' }}</td>
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <button class="btn btn-outline-info" title="View Details" onclick="viewBookDetails('{{ book.id }}')">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                        <button class="btn btn-outline-primary" title="Edit" onclick="editBook('{{ book.id }}', '{{ book.title | replace("'", "\\'") | replace('"', '\\"') }}', '{{ book.author | replace("'", "\\'") | replace('"', '\\"') }}', '{{ book.isbn | replace("'", "\\'") | replace('"', '\\"') }}', '{{ book.publisher | replace("'", "\\'") | replace('"', '\\"') }}', '{{ book.publication_year | replace("'", "\\'") | replace('"', '\\"') }}', '{{ book.accession_number | replace("'", "\\'") | replace('"', '\\"') }}', '{{ book.call_number | replace("'", "\\'") | replace('"', '\\"') }}', '{{ book.status }}', '{{ book.category.name | replace("'", "\\'") | replace('"', '\\"') }}', '{{ book.id }}')">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger" title="Delete" onclick="deleteBook('{{ book.id }}', '{{ book.title | replace("'", "\\'") }}')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Mobile Card View -->
+                <div class="d-md-none" id="booksCards">
+                    {% for book in books %}
+                    <div class="card mb-3 book-card" data-search="{{ book.id }} {{ book.accession_number }} {{ book.call_number }} {{ book.title }} {{ book.author }} {{ book.isbn }} {{ book.category.name }}">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-8">
+                                    <h6 class="card-title mb-1">
+                                        <small class="text-muted">Book #{{ book.id }}</small><br>
+                                        <span class="fw-bold">{{ book.accession_number }}</span>
+                                    </h6>
+                                    <p class="card-text small text-muted mb-1">{{ book.title }}</p>
+                                    <p class="card-text small mb-2">by {{ book.author }}</p>
+                                    <div class="d-flex gap-2 mb-2">
+                                        {% if book.status == 'available' %}
+                                            <span class="badge bg-success fs-7">{{ book.status.title() }}</span>
+                                        {% elif book.status == 'issued' %}
+                                            <span class="badge bg-warning fs-7">{{ book.status.title() }}</span>
+                                        {% elif book.status == 'lost' %}
+                                            <span class="badge bg-danger fs-7">{{ book.status.title() }}</span>
+                                        {% elif book.status == 'damaged' %}
+                                            <span class="badge bg-danger fs-7">{{ book.status.title() }}</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary fs-7">{{ book.status.title() }}</span>
+                                        {% endif %}
+                                    </div>
+                                    {% if book.publication_year %}
+                                        <small class="text-muted">Published: {{ book.publication_year }}</small>
+                                    {% endif %}
+                                </div>
+                                <div class="col-4 text-end">
+                                    <div class="btn-group-vertical btn-group-sm" role="group">
+                                        <button class="btn btn-outline-info btn-sm" title="View Details" onclick="viewBookDetails('{{ book.id }}')">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                        <button class="btn btn-outline-primary btn-sm" title="Edit" onclick="editBook('{{ book.id }}', '{{ book.title | replace("'", "\\'") | replace('"', '\\"') }}', '{{ book.author | replace("'", "\\'") | replace('"', '\\"') }}', '{{ book.isbn | replace("'", "\\'") | replace('"', '\\"') }}', '{{ book.publisher | replace("'", "\\'") | replace('"', '\\"') }}', '{{ book.publication_year | replace("'", "\\'") | replace('"', '\\"') }}', '{{ book.accession_number | replace("'", "\\'") | replace('"', '\\"') }}', '{{ book.call_number | replace("'", "\\'") | replace('"', '\\"') }}', '{{ book.status }}', '{{ book.category.name | replace("'", "\\'") | replace('"', '\\"') }}', '{{ book.id }}')">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger btn-sm" title="Delete" onclick="deleteBook('{{ book.id }}', '{{ book.title | replace("'", "\\'") }}')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Pagination -->
+                <nav aria-label="Books pagination" class="mt-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <p class="text-muted mb-0">
+                                Showing {{ books|length }} books per page |
+                                Page {{ page }} of {{ total_pages }} |
+                                Total: <span id="bookCount">{{ total_books }}</span> books
+                            </p>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <div class="btn-group" role="group">
+                                {% if has_prev %}
+                                <a href="{{ url_for('books.books', page=page-1, search=search) }}" class="btn btn-outline-secondary btn-sm">
+                                    <i class="bi bi-chevron-left me-1"></i>Previous
+                                </a>
+                                {% endif %}
+
+                                {% if has_next %}
+                                <a href="{{ url_for('books.books', page=page+1, search=search) }}" class="btn btn-outline-secondary btn-sm">
+                                    Next<i class="bi bi-chevron-right ms-1"></i>
+                                </a>
+                                {% endif %}
+
+                                <a href="{{ url_for('books.books', page=1, search=search) }}" class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-chevron-bar-left me-1"></i>First
+                                </a>
+
+                                {% if total_pages > 1 %}
+                                <a href="{{ url_for('books.books', page=total_pages, search=search) }}" class="btn btn-outline-primary btn-sm">
+                                    Last<i class="bi bi-chevron-bar-right ms-1"></i>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Page Numbers -->
+                    {% if total_pages > 1 %}
+                    <div class="row mt-3">
+                        <div class="col-12 text-center">
+                            <div class="btn-group" role="group">
+                                {% for page_num in range(1, total_pages + 1) %}
+                                    {% if page_num == page %}
+                                        <a href="{{ url_for('books.books', page=page_num, search=search) }}" class="btn btn-primary btn-sm">{{ page_num }}</a>
+                                    {% elif page_num == 1 or page_num == total_pages or (page_num >= page - 2 and page_num <= page + 2) %}
+                                        <a href="{{ url_for('books.books', page=page_num, search=search) }}" class="btn btn-outline-primary btn-sm">{{ page_num }}</a>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </nav>
+            {% else %}
+                <div class="text-center text-muted py-5">
+                    <i class="bi bi-book fs-1 mb-3"></i>
+                    <p>No books found</p>
+                    <a href="{{ url_for('books.add_book') }}" class="btn btn-primary">Add First Book</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+function refreshPage() {
+    window.location.reload();
+}
+
+// Search functionality
+function searchBooks() {
+    var searchTerm = $('#bookSearch').val().toLowerCase();
+    var visibleItems = 0;
+
+    // Search in desktop table
+    $('#booksTable tbody tr').each(function() {
+        var row = $(this);
+        var bookNo = row.find('td:nth-child(1)').text().toLowerCase();
+        var accessionNo = row.find('td:nth-child(2)').text().toLowerCase();
+        var callNo = row.find('td:nth-child(3)').text().toLowerCase();
+        var title = row.find('td:nth-child(4)').text().toLowerCase();
+        var author = row.find('td:nth-child(5)').text().toLowerCase();
+
+        if (bookNo.includes(searchTerm) ||
+            accessionNo.includes(searchTerm) ||
+            callNo.includes(searchTerm) ||
+            title.includes(searchTerm) ||
+            author.includes(searchTerm)) {
+            row.show();
+            visibleItems++;
+        } else {
+            row.hide();
+        }
+    });
+
+    // Search in mobile cards
+    $('.book-card').each(function() {
+        var card = $(this);
+        var searchText = card.data('search').toLowerCase();
+
+        if (searchText.includes(searchTerm)) {
+            card.show();
+            visibleItems++;
+        } else {
+            card.hide();
+        }
+    });
+
+    // Update book count
+    $('#bookCount').text(visibleItems);
+
+    // Show/hide "no results" message
+    if (visibleItems === 0 && searchTerm !== '') {
+        showNoResultsMessage();
+    } else {
+        hideNoResultsMessage();
+    }
+}
+
+$(document).ready(function() {
+    // Clear search functionality
+    $('#clearSearch').on('click', function() {
+        $('#bookSearch').val('');
+        $('#booksTable tbody tr').show();
+        $('.book-card').show();
+        $('#bookCount').text('{{ books|length }}');
+        hideNoResultsMessage();
+    });
+
+    // Enter key triggers search
+    $('#bookSearch').on('keypress', function(e) {
+        if (e.which === 13) { // Enter key
+            searchBooks();
+        }
+    });
+
+    // Auto-search as user types (optional)
+    $('#bookSearch').on('input', function() {
+        if ($(this).val() === '') {
+            $('#clearSearch').click();
+        }
+    });
+});
+
+function showNoResultsMessage() {
+    if ($('#noResultsRow').length === 0) {
+        $('#booksTable tbody').append(
+            '<tr id="noResultsRow">' +
+                '<td colspan="8" class="text-center text-muted py-4">' +
+                    '<i class="bi bi-search fs-1 mb-3"></i>' +
+                    '<p>No books found matching your search</p>' +
+                    '<button class="btn btn-sm btn-outline-primary" onclick="clearSearchAndFocus()">Clear Search</button>' +
+                '</td>' +
+            '</tr>'
+        );
+    }
+}
+
+function hideNoResultsMessage() {
+    $('#noResultsRow').remove();
+}
+
+function clearSearchAndFocus() {
+    $('#bookSearch').val('').focus();
+    $('#clearSearch').click();
+}
+
+// Edit and Delete functionality
+function editBook(id, title, author, isbn, publisher, publicationYear, accessionNumber, callNumber, status, category, bookNo) {
+    // Redirect to edit form with pre-populated data
+    var params = new URLSearchParams({
+        'title': title,
+        'author': author,
+        'isbn': isbn || '',
+        'publisher': publisher || '',
+        'publication_year': publicationYear || '',
+        'accession_number': accessionNumber,
+        'call_number': callNumber || '',
+        'status': status,
+        'category': category || '',
+        'book_no': bookNo || 'NA'
+    });
+
+    window.location.href = "{{ url_for('books.add_book') }}?" + params.toString();
+}
+
+function deleteBook(id, title) {
+    if (confirm('Are you sure you want to delete book: ' + title + '?\n\nThis action cannot be undone.')) {
+        // Show loading state
+        const button = event.target.closest('button');
+        const originalText = button.innerHTML;
+        button.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Deleting...';
+        button.disabled = true;
+
+        // Make AJAX call to delete the book
+        fetch('/delete_book/' + id, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Show success message
+                showToast('Book "' + title + '" deleted successfully!', 'success');
+
+                // Remove the book row from the table
+                const row = button.closest('tr');
+                if (row) {
+                    row.remove();
+                }
+
+                // Remove from mobile cards if present
+                const card = button.closest('.book-card');
+                if (card) {
+                    card.remove();
+                }
+
+                // Update book count
+                updateBookCount();
+            } else {
+                // Show error message
+                showToast(data.error, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('Failed to delete book. Please try again.', 'error');
+        })
+        .finally(() => {
+            // Restore button state
+            button.innerHTML = originalText;
+            button.disabled = false;
+        });
+    }
+}
+
+function updateBookCount() {
+    const visibleRows = document.querySelectorAll('#booksTable tbody tr').length;
+    const visibleCards = document.querySelectorAll('.book-card').length;
+    const totalVisible = visibleRows + visibleCards;
+
+    document.querySelectorAll('#bookCount').forEach(el => {
+        el.textContent = totalVisible;
+    });
+}
+
+function showToast(message, type) {
+    // Create toast element if it doesn't exist
+    let toastContainer = document.querySelector('.toast-container');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+        toastContainer.style.zIndex = '9999';
+        document.body.appendChild(toastContainer);
+    }
+
+    // Create toast
+    const toast = document.createElement('div');
+    toast.className = `toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0`;
+    toast.setAttribute('role', 'alert');
+    toast.innerHTML = `
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>
+                ${message}
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    `;
+
+    toastContainer.appendChild(toast);
+
+    // Initialize and show toast
+    const bsToast = new bootstrap.Toast(toast);
+    bsToast.show();
+
+    // Remove toast after it's hidden
+    toast.addEventListener('hidden.bs.toast', () => {
+        toast.remove();
+    });
+}
+
+function viewBookDetails(id) {
+    window.location.href = "{{ url_for('books.book_details', book_id=0) }}".replace('0', id);
+}
+</script>
+{% endblock %}

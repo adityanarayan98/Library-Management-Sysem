@@ -1,0 +1,241 @@
+{% extends "opac/patron_base.html" %}
+
+{% block title %}{{ book.title }} - Book Details{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('opac.opac_home') }}">{{ library_name }} Catalog</a></li>
+            <li class="breadcrumb-item active">{{ book.title | truncate(50) }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Book Information -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0"><i class="bi bi-book me-2"></i>Book Details</h4>
+                    <div class="btn-group" role="group">
+                        <a href="{{ url_for('opac.opac_home') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Back to Catalog
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Book Status -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            {% if book.status == 'available' %}
+                                <span class="badge bg-success fs-6 px-3 py-2">
+                                    <i class="bi bi-check-circle me-1"></i>Available
+                                </span>
+                            {% elif book.status == 'issued' %}
+                                <span class="badge bg-warning fs-6 px-3 py-2">
+                                    <i class="bi bi-exclamation-triangle me-1"></i>Currently Issued
+                                </span>
+                            {% elif book.status == 'lost' %}
+                                <span class="badge bg-danger fs-6 px-3 py-2">
+                                    <i class="bi bi-x-circle me-1"></i>Lost
+                                </span>
+                            {% elif book.status == 'damaged' %}
+                                <span class="badge bg-danger fs-6 px-3 py-2">
+                                    <i class="bi bi-exclamation-triangle me-1"></i>Damaged
+                                </span>
+                            {% else %}
+                                <span class="badge bg-secondary fs-6 px-3 py-2">{{ book.status.title() }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Book Information Grid -->
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="book-info-item">
+                                <label class="text-muted fw-bold">Accession No.</label>
+                                <div class="fw-bold fs-5">{{ book.accession_number }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="book-info-item">
+                                <label class="text-muted fw-bold">Call Number</label>
+                                <div class="fw-bold">{{ book.call_number or '-' }}</div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="book-info-item">
+                                <label class="text-muted fw-bold">Title</label>
+                                <div class="fw-bold fs-4">{{ book.title }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="book-info-item">
+                                <label class="text-muted fw-bold">Author</label>
+                                <div class="fs-5">{{ book.author }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="book-info-item">
+                                <label class="text-muted fw-bold">Publisher</label>
+                                <div>{{ book.publisher or '-' }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="book-info-item">
+                                <label class="text-muted fw-bold">Publication Year</label>
+                                <div>{{ book.publication_year or '-' }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="book-info-item">
+                                <label class="text-muted fw-bold">ISBN</label>
+                                <div>{{ book.isbn or '-' }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="book-info-item">
+                                <label class="text-muted fw-bold">Category</label>
+                                <div>
+                                    {% if book.category %}
+                                        <span class="badge bg-primary">{{ book.category.name }}</span>
+                                    {% else %}
+                                        <span class="text-muted">Uncategorized</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+
+            <!-- Current Transaction (if book is issued) -->
+            {% if current_transaction %}
+            <div class="card mt-4">
+                <div class="card-header bg-warning bg-opacity-10">
+                    <h5 class="mb-0 text-warning"><i class="bi bi-exclamation-triangle me-2"></i>Currently Issued</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Issued To:</strong><br>
+                            {{ current_transaction.patron.name }} ({{ current_transaction.patron.roll_no }})
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Due Date:</strong><br>
+                            {{ current_transaction.due_date }}
+                            {% if current_transaction.due_date < date.today() %}
+                                <span class="badge bg-danger ms-2">Overdue</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <small class="text-muted">
+                            <i class="bi bi-info-circle me-1"></i>
+                            This book is currently issued and not available for holds.
+                        </small>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Library Information - Right side, positioned lower -->
+        <div class="col-lg-4">
+            <!-- Library Information -->
+            <div class="card mt-5 pt-6">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Library Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-building text-primary me-3 fs-4"></i>
+                        <div>
+                            <div class="fw-bold"> Library</div>
+                            <small class="text-muted">{{ library_name }}</small>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-envelope text-info me-3"></i>
+                        <div>
+                            <div class="fw-bold">Contact Librarian</div>
+                            <small class="text-muted">{{ librarian_email }}</small>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-telephone text-success me-3"></i>
+                        <div>
+                            <div class="fw-bold">Support</div>
+                            <small class="text-muted">Available during library hours</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Actions -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <a href="{{ url_for('opac.opac_home') }}" class="btn btn-outline-primary w-100">
+                                <i class="bi bi-search me-2"></i>Search More Books
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{{ url_for('opac.categories') }}" class="btn btn-outline-info w-100">
+                                <i class="bi bi-grid-3x2 me-2"></i>Browse Categories
+                            </a>
+                        </div>
+                        {% if patron_session %}
+                        <div class="col-md-3">
+                            <a href="{{ url_for('patron_auth.patron_dashboard') }}" class="btn btn-outline-secondary w-100">
+                                <i class="bi bi-speedometer2 me-2"></i>My Dashboard
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.book-info-item {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 0.5rem;
+    border-left: 4px solid var(--accent-color);
+}
+
+.book-info-item label {
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+    display: block;
+    color: #6c757d;
+    font-weight: 600;
+}
+
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.badge {
+    font-size: 0.875rem;
+}
+</style>
+
+
+{% endblock %}

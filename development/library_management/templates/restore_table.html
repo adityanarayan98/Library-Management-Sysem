@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Restore {{ table_name|title }} - Library Management System{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="row align-items-center">
+            <div class="col">
+                <h1 class="mb-0"><i class="bi bi-arrow-clockwise me-2"></i>Restore {{ table_name|title }}</h1>
+                <p class="text-muted mb-0">Restore {{ table_name }} data from backup file</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0"><i class="bi bi-exclamation-triangle me-2"></i>Warning: Destructive Operation</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        <strong>Warning!</strong> This operation will replace existing {{ table_name }} data with data from the backup file.
+                        This action cannot be undone. Make sure you have a current backup before proceeding.
+                    </div>
+
+                    <form method="POST" enctype="multipart/form-data">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <div class="mb-3">
+                            <label for="file" class="form-label">Select Backup CSV File</label>
+                            <input type="file" class="form-control" id="file" name="file" accept=".csv" required>
+                            <div class="form-text">
+                                Upload a CSV backup file for {{ table_name }}. Only CSV files are supported.
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <h6>Expected CSV Format:</h6>
+                            <p class="text-muted small">The CSV file should match the structure of the {{ table_name }} table:</p>
+                            <div class="bg-light p-3 rounded">
+                                {% if table_name == 'patrons' %}
+                                <code>id, roll_no, name, email, phone, patron_type, department, division, status, max_books, created_at, updated_at</code>
+                                {% elif table_name == 'books' %}
+                                <code>id, title, author, isbn, publisher, publication_year, accession_number, category_id, status, created_at, updated_at</code>
+                                {% elif table_name == 'categories' %}
+                                <code>id, name, description, is_active, created_at</code>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <h6>Restore Behavior:</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-check-circle text-success me-2"></i>Records with matching IDs will be replaced</li>
+                                <li><i class="bi bi-check-circle text-success me-2"></i>New records will be added</li>
+                                <li><i class="bi bi-exclamation-triangle text-warning me-2"></i>Existing records not in backup will remain</li>
+                                <li><i class="bi bi-exclamation-triangle text-warning me-2"></i>Foreign key relationships may be affected</li>
+                            </ul>
+                        </div>
+
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to restore {{ table_name }}? This will overwrite existing data!')">
+                            <i class="bi bi-arrow-clockwise me-2"></i>Restore {{ table_name|title }}
+                        </button>
+                        <a href="{{ url_for('backup.backup_data') }}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left me-2"></i>Back to Backup
+                        </a>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Before You Restore</h5>
+                </div>
+                <div class="card-body">
+                    <ol class="mb-0">
+                        <li>Create a current backup of your data</li>
+                        <li>Verify the backup file is not corrupted</li>
+                        <li>Check that the file format matches the expected structure</li>
+                        <li>Ensure you have the correct table backup file</li>
+                        <li>Consider restoring during low-usage hours</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-download me-2"></i>Create Backup First</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small mb-2">Before restoring, create a fresh backup:</p>
+                    <a href="{{ url_for('backup.backup_data') }}" class="btn btn-success btn-sm">
+                        <i class="bi bi-cloud-download me-1"></i>Go to Backup Page
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function confirmRestore() {
+    return confirm('Are you absolutely sure you want to restore {{ table_name }}?\n\nThis will:\n• Replace existing {{ table_name }} data\n• Cannot be undone\n• May affect related data\n\nMake sure you have a current backup!');
+}
+</script>
+{% endblock %}

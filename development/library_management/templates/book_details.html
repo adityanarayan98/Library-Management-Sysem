@@ -1,0 +1,296 @@
+{% extends "base.html" %}
+
+{% block title %}Book Details - {{ library_name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('core.dashboard') }}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('books.books') }}">Books</a></li>
+            <li class="breadcrumb-item active">{{ book.title | replace("'", "\\'") }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Book Information -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0"><i class="bi bi-book me-2"></i>Book Details</h4>
+                    <div class="btn-group" role="group">
+                        <a href="{{ url_for('books.books') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Back to Books
+                        </a>
+                        <button class="btn btn-primary" onclick="editBook()">
+                            <i class="bi bi-pencil me-1"></i>Edit Book
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Book Status -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            {% if book.status == 'available' %}
+                                <span class="badge bg-success fs-6 px-3 py-2">
+                                    <i class="bi bi-check-circle me-1"></i>Available
+                                </span>
+                            {% elif book.status == 'issued' %}
+                                <span class="badge bg-warning fs-6 px-3 py-2">
+                                    <i class="bi bi-exclamation-triangle me-1"></i>Issued
+                                </span>
+                            {% elif book.status == 'lost' %}
+                                <span class="badge bg-danger fs-6 px-3 py-2">
+                                    <i class="bi bi-x-circle me-1"></i>Lost
+                                </span>
+                            {% elif book.status == 'damaged' %}
+                                <span class="badge bg-danger fs-6 px-3 py-2">
+                                    <i class="bi bi-exclamation-triangle me-1"></i>Damaged
+                                </span>
+                            {% else %}
+                                <span class="badge bg-secondary fs-6 px-3 py-2">{{ book.status.title() }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Book Information Grid -->
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="book-info-item">
+                                <label class="text-muted fw-bold">Book No.</label>
+                                <div class="fw-bold fs-5">{{ book.id }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="book-info-item">
+                                <label class="text-muted fw-bold">Accession No.</label>
+                                <div class="fw-bold fs-5">{{ book.accession_number }}</div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="book-info-item">
+                                <label class="text-muted fw-bold">Title</label>
+                                <div class="fw-bold fs-5">{{ book.title }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="book-info-item">
+                                <label class="text-muted fw-bold">Author</label>
+                                <div>{{ book.author }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="book-info-item">
+                                <label class="text-muted fw-bold">Publisher</label>
+                                <div>{{ book.publisher or '-' }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="book-info-item">
+                                <label class="text-muted fw-bold">Publication Year</label>
+                                <div>{{ book.publication_year or '-' }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="book-info-item">
+                                <label class="text-muted fw-bold">ISBN</label>
+                                <div>{{ book.isbn or '-' }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="book-info-item">
+                                <label class="text-muted fw-bold">Call Number</label>
+                                <div>{{ book.call_number or '-' }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="book-info-item">
+                                <label class="text-muted fw-bold">Category</label>
+                                <div>
+                                    {% if book.category %}
+                                        <span class="badge bg-primary">{{ book.category.name }}</span>
+                                    {% else %}
+                                        <span class="text-muted">Uncategorized</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Current Transaction (if book is issued) -->
+            {% if current_transaction %}
+            <div class="card mt-4 pt-3">
+                <div class="card-header bg-warning bg-opacity-10">
+                    <h5 class="mb-0 text-warning"><i class="bi bi-exclamation-triangle me-2"></i>Currently Issued</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Issued To:</strong><br>
+                            {{ current_transaction.patron.name }} ({{ current_transaction.patron.roll_no }})
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Due Date:</strong><br>
+                            {{ current_transaction.due_date }}
+                            {% if current_transaction.due_date < today_date %}
+                                <span class="badge bg-danger ms-2">Overdue</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Transaction History -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Transaction History</h5>
+                </div>
+                <div class="card-body">
+                    {% if transactions %}
+                        <div class="timeline">
+                            {% for transaction in transactions %}
+                            <div class="timeline-item">
+                                <div class="timeline-marker {% if transaction[7] == 'issued' %}bg-warning{% else %}bg-success{% endif %}"></div>
+                                <div class="timeline-content">
+                                    <div class="fw-bold">
+                                        {% if transaction.status == 'issued' %}
+                                            <i class="bi bi-arrow-up-circle text-warning me-1"></i>Issued
+                                        {% else %}
+                                            <i class="bi bi-arrow-down-circle text-success me-1"></i>Returned
+                                        {% endif %}
+                                    </div>
+                                    <div class="text-muted small">
+                                        {{ transaction.issue_date }} <!-- Issue date -->
+                                    </div>
+                                    <div class="mt-1">
+                                        <small class="text-muted">
+                                            {% if transaction.status == 'issued' %}
+                                                To: {{ transaction.patron.name }} ({{ transaction.patron.roll_no }})
+                                            {% else %}
+                                                By: {{ transaction.patron.name }} ({{ transaction.patron.roll_no }})
+                                            {% endif %}
+                                        </small>
+                                    </div>
+                                    {% if transaction.status == 'issued' and transaction.due_date %}
+                                        <div class="mt-1">
+                                            <small class="text-muted">Due: {{ transaction.due_date }}</small>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center text-muted py-4">
+                            <i class="bi bi-clock-history fs-1 mb-3"></i>
+                            <p>No transaction history</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.book-info-item {
+    margin-bottom: 1.5rem;
+}
+
+.book-info-item label {
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.timeline {
+    position: relative;
+    padding-left: 2rem;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 0.75rem;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #dee2e6;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+}
+
+.timeline-item:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -2rem;
+    top: 0;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid #dee2e6;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -2rem;
+    top: 0;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    z-index: 1;
+}
+
+.timeline-content {
+    margin-left: 0.5rem;
+}
+</style>
+
+<script>
+function editBook() {
+    var title = "{{ book.title | replace('\"', '\\\\\"') }}";
+    var author = "{{ book.author | replace('\"', '\\\\\"') }}";
+    var isbn = "{{ book.isbn or '' }}";
+    var publisher = "{{ book.publisher or '' }}";
+    var publicationYear = "{{ book.publication_year or '' }}";
+    var accessionNumber = "{{ book.accession_number }}";
+    var status = "{{ book.status }}";
+    var callNumber = "{{ book.call_number or '' }}";
+    var category = "{{ book.category.name if book.category else '' }}";
+    var bookNo = "{{ book.id }}";
+
+    var url = "{{ url_for('books.add_book') }}?" +
+              "title=" + encodeURIComponent(title) +
+              "&author=" + encodeURIComponent(author) +
+              "&isbn=" + encodeURIComponent(isbn) +
+              "&publisher=" + encodeURIComponent(publisher) +
+              "&publication_year=" + encodeURIComponent(publicationYear) +
+              "&accession_number=" + encodeURIComponent(accessionNumber) +
+              "&status=" + encodeURIComponent(status) +
+              "&call_number=" + encodeURIComponent(callNumber) +
+              "&category=" + encodeURIComponent(category) +
+              "&book_no=" + encodeURIComponent(bookNo);
+
+    window.location.href = url;
+}
+</script>
+{% endblock %}

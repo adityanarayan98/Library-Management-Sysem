@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Bulk Upload Books - Library Management System{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="row align-items-center">
+            <div class="col">
+                <h1 class="mb-0"><i class="bi bi-book me-2"></i>Bulk Upload Books</h1>
+                <p class="text-muted mb-0">Upload multiple books from a CSV file</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-cloud-upload me-2"></i>Upload CSV File</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <div class="mb-3">
+                            <label for="file" class="form-label">Select CSV File</label>
+                            <input type="file" class="form-control" id="file" name="file" accept=".csv" required>
+                            <div class="form-text">
+                                Upload a CSV file containing book data. Maximum file size: 10MB
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <h6>Required CSV Format:</h6>
+                            <p class="text-muted small">Your CSV file must contain the following columns in this exact order:</p>
+                            <div class="bg-light p-3 rounded">
+                                <code>title, author, accession_number</code> <span class="text-danger">*</span> (Required)<br>
+                                <code>isbn, publisher, publication_year, category</code> (Optional)
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <h6>Sample CSV Format:</h6>
+                            <div class="bg-light p-3 rounded">
+                                <pre class="mb-0 small"><code>title,author,accession_number,isbn,publisher,publication_year,category
+Introduction to Python,John Smith,CS001,978-0123456789,Pearson,2020,Computer Science
+Data Structures and Algorithms,Jane Doe,CS002,978-0987654321,McGraw Hill,2019,Computer Science</code></pre>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <h6>Field Descriptions:</h6>
+                            <ul class="list-unstyled">
+                                <li><strong>title</strong>: Book title <span class="text-danger">*</span></li>
+                                <li><strong>author</strong>: Book author <span class="text-danger">*</span></li>
+                                <li><strong>accession_number</strong>: Unique accession number <span class="text-danger">*</span></li>
+                                <li><strong>isbn</strong>: International Standard Book Number (optional)</li>
+                                <li><strong>publisher</strong>: Publisher name (optional)</li>
+                                <li><strong>publication_year</strong>: Year of publication (optional)</li>
+                                <li><strong>category</strong>: Book category (will be created if doesn't exist)</li>
+                            </ul>
+                        </div>
+
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-cloud-upload me-2"></i>Upload and Process
+                        </button>
+                        <a href="{{ url_for('books.books') }}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left me-2"></i>Back to Books
+                        </a>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Instructions</h5>
+                </div>
+                <div class="card-body">
+                    <ol class="mb-0">
+                        <li>Prepare your CSV file with the correct format</li>
+                        <li>Ensure accession numbers are unique</li>
+                        <li>Check that required fields (title, author, accession_number) are filled</li>
+                        <li>Upload the file using the form</li>
+                        <li>Review the results and fix any errors</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header bg-warning">
+                    <h5 class="mb-0"><i class="bi bi-exclamation-triangle me-2"></i>Important Notes</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li><i class="bi bi-check-circle text-success me-2"></i>Existing books will be updated</li>
+                        <li><i class="bi bi-check-circle text-success me-2"></i>New books will be added as "available"</li>
+                        <li><i class="bi bi-check-circle text-success me-2"></i>New categories will be created automatically</li>
+                        <li><i class="bi bi-exclamation-triangle text-warning me-2"></i>Large files may take time to process</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="bi bi-download me-2"></i>Download Sample</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small mb-2">Download a sample CSV file to see the correct format:</p>
+                    <a href="{{ url_for('backup.export_table', table_name='books') }}" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-download me-1"></i>Download Current Books (CSV)
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
